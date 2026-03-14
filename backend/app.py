@@ -4,349 +4,591 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import random
 import string
+import requests
 from datetime import datetime, timedelta
-import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-in-production'
-app.config['SESSION_COOKIE_SECURE'] = False
+app.secret_key = 'proshop-secret-2024'
+app.config['SESSION_COOKIE_SECURE']   = False
 app.config['SESSION_COOKIE_HTTPONLY'] = False
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-CORS(app, supports_credentials=True, origins=['http://localhost:5500', 'http://localhost:8000', 'http://127.0.0.1:5500'])
+
+# ✅ FIXED CORS - Removed 'null' from origins
+CORS(app, 
+     supports_credentials=True,
+     origins=['http://localhost:5500',
+              'http://localhost:8000',
+              'http://127.0.0.1:5500',
+              'http://127.0.0.1:8000',
+              'http://localhost:3000'],
+     allow_headers=['Content-Type'],
+     expose_headers=['Content-Type'])
+
+FAST2SMS_API_KEY = 'YOUR_FAST2SMS_API_KEY_HERE'   # 🔑 Replace with your key
 
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=30)
+    app.permanent_session_lifetime = timedelta(hours=2)
 
 def get_user_id():
-    """Get user_id from session or header"""
-    user_id = session.get('user_id')
-    if not user_id:
-        user_id = request.headers.get('X-User-ID')
-    return user_id
+    return session.get('user_id')
 
+@app.route('/api/debug/session', methods=['GET'])
+def debug_session():
+    return jsonify({
+        'user_id': get_user_id(),
+        'session_data': dict(session),
+        'is_admin': is_admin()
+    })
+
+def is_admin():
+    uid = get_user_id()
+    print(f"🔍 is_admin check - user_id from session: {uid}")
+    
+    if not uid:
+        print("❌ No user_id in session")
+        return False
+    
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('SELECT role FROM users WHERE id=?', (uid,))
+    row = c.fetchone()
+    conn.close()
+    
+    print(f"🔍 User role from DB: {row}")
+    is_admin_user = row and row[0] == 'admin'
+    print(f"✅ is_admin result: {is_admin_user}")
+    
+    return is_admin_user
+
+# ── DB INIT ───────────────────────────────────────────────────────────
 def init_db():
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT, 
-                  phone TEXT UNIQUE, role TEXT, created_at TIMESTAMP)''')
+                 (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT,
+                  phone TEXT UNIQUE, role TEXT, created_at TIMESTAMP,
+                  address TEXT, pincode TEXT, apartment TEXT)''')
     c.execute('''CREATE TABLE IF NOT EXISTS otp
-                 (id INTEGER PRIMARY KEY, phone TEXT, otp TEXT, 
+                 (id INTEGER PRIMARY KEY, phone TEXT, otp TEXT,
                   expires_at TIMESTAMP, created_at TIMESTAMP)''')
     c.execute('''CREATE TABLE IF NOT EXISTS products
-                 (id INTEGER PRIMARY KEY, name TEXT, description TEXT, 
-                  price REAL, image_url TEXT, stock INTEGER, created_at TIMESTAMP)''')
+                 (id INTEGER PRIMARY KEY, name TEXT, description TEXT,
+                  price REAL, image_url TEXT, stock INTEGER,
+                  max_qty INTEGER DEFAULT 10,
+                  delivery_fee REAL DEFAULT 40.0,
+                  created_at TIMESTAMP)''')
     c.execute('''CREATE TABLE IF NOT EXISTS cart
-                 (id INTEGER PRIMARY KEY, user_id INTEGER, product_id INTEGER, 
-                  quantity INTEGER, added_at TIMESTAMP, 
+                 (id INTEGER PRIMARY KEY, user_id INTEGER, product_id INTEGER,
+                  quantity INTEGER, added_at TIMESTAMP,
                   FOREIGN KEY(user_id) REFERENCES users(id))''')
     c.execute('''CREATE TABLE IF NOT EXISTS orders
-                 (id INTEGER PRIMARY KEY, user_id INTEGER, total_amount REAL, 
-                  status TEXT, payment_method TEXT, created_at TIMESTAMP,
+                 (id INTEGER PRIMARY KEY, user_id INTEGER, total_amount REAL,
+                  status TEXT, payment_method TEXT, payment_status TEXT DEFAULT 'pending',
+                  upi_ref TEXT, created_at TIMESTAMP,
                   FOREIGN KEY(user_id) REFERENCES users(id))''')
     c.execute('''CREATE TABLE IF NOT EXISTS order_items
-                 (id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, 
+                 (id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER,
                   quantity INTEGER, price REAL,
                   FOREIGN KEY(order_id) REFERENCES orders(id))''')
+    # Safe migrations for existing DBs
+    for table, col, typedef in [
+        ('users',    'address',        'TEXT'),
+        ('users',    'pincode',        'TEXT'),
+        ('users',    'apartment',      'TEXT'),
+        ('products', 'max_qty',        'INTEGER DEFAULT 10'),
+        ('products', 'delivery_fee',   'REAL DEFAULT 40.0'),
+        ('orders',   'payment_status', "TEXT DEFAULT 'pending'"),
+        ('orders',   'upi_ref',        'TEXT'),
+    ]:
+        try:
+            c.execute(f'ALTER TABLE {table} ADD COLUMN {col} {typedef}')
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
 def seed_sample_data():
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM users WHERE role=?', ('admin',))
+
+    # Admin user
+    c.execute('SELECT id FROM users WHERE role="admin"')
     if not c.fetchone():
-        hashed_pwd = generate_password_hash('admin123')
-        c.execute('INSERT INTO users (username, password, phone, role, created_at) VALUES (?, ?, ?, ?, ?)',
-                  ('admin', hashed_pwd, '0000000000', 'admin', datetime.now()))
+        c.execute('INSERT INTO users (username,password,phone,role,created_at) VALUES (?,?,?,?,?)',
+                  ('admin', generate_password_hash('admin123'), '0000000000', 'admin', datetime.now()))
+
+    # Default customer: 9994656840 / password 8899
+    c.execute('SELECT id FROM users WHERE phone=?', ('9994656840',))
+    if not c.fetchone():
+        c.execute('''INSERT INTO users (username,password,phone,role,created_at)
+                     VALUES (?,?,?,?,?)''',
+                  ('user_9994656840', generate_password_hash('8899'),
+                   '9994656840', 'customer', datetime.now()))
+        print("✅ Default customer created: 9994656840 / 8899")
+
+    # Products
     c.execute('SELECT COUNT(*) FROM products')
     if c.fetchone()[0] == 0:
-        products = [
-            ('Laptop Pro 15', 'High-performance laptop', 999.99, 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400', 10),
-            ('Wireless Earbuds', 'Noise-cancelling earbuds', 149.99, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400', 25),
-            ('Smart Watch', 'Smartwatch with health tracking', 299.99, 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400', 15),
-            ('USB-C Cable', 'Fast charging cable', 19.99, 'https://images.unsplash.com/photo-1625948515291-69613efd103f?w=400', 50),
-            ('Phone Stand', 'Adjustable phone holder', 24.99, 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400', 30),
-            ('Mechanical Keyboard', 'RGB mechanical keyboard', 129.99, 'https://images.unsplash.com/photo-1587829191301-dec8891c4158?w=400', 20),
+        rows = [
+            ('Veg Sandwich',          'AnyTime | Fresh vegetables with chutney in toasted bread',            60.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 50, 10,  0.0),
+            ('Paneer Sandwich',       'AnyTime | Spiced cottage cheese filling in soft bread',               80.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 40, 10,  0.0),
+            ('Mushroom Sandwich',     'AnyTime | Sauteed mushrooms with herbs in toasted bread',             85.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 35, 10,  0.0),
+            ('Corn Sandwich',         'AnyTime | Sweet corn with mayo and veggies in bread',                 70.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 40, 10,  0.0),
+            ('Veg Cheese Sandwich',   'AnyTime | Fresh vegetables loaded with melted cheese',                90.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 40, 10,  0.0),
+            ('Paneer Cheese Sandwich','AnyTime | Paneer and cheese combo in grilled bread',                 110.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 35, 10,  0.0),
+            ('Corn Cheese Sandwich',  'AnyTime | Sweet corn with extra cheese in toasted bread',             95.0, 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400', 35, 10,  0.0),
+            ('Bread Toast',           'AnyTime | Crispy buttered bread toast, served with chutney',          30.0, 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=400', 60, 10,  0.0),
+            ('Veg Maggi Noodles',     'AnyTime | Classic Maggi noodles cooked with fresh vegetables',        60.0, 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400', 50, 10,  0.0),
+            ('Sesame Oil',            'Groceries | Oil | Cold-pressed pure sesame oil, 500 ml',             180.0, 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', 30,  5, 40.0),
+            ('Deepa Oil',             'Groceries | Oil | Deepa brand refined cooking oil, 1 L',             150.0, 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', 30,  5, 40.0),
+            ('Groundnut Oil',         'Groceries | Oil | Cold-pressed groundnut oil, 1 L',                  200.0, 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', 25,  5, 40.0),
+            ('Sunflower Oil',         'Groceries | Oil | Refined sunflower cooking oil, 1 L',               160.0, 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', 30,  5, 40.0),
+            ('Mango Pickle',          'Groceries | Pickles | Spicy raw mango pickle in sesame oil, 300 g',   90.0, 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400', 40, 10, 40.0),
+            ('Lemon Pickle',          'Groceries | Pickles | Tangy lemon pickle with spices, 300 g',         85.0, 'https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400', 40, 10, 40.0),
         ]
-        for name, desc, price, img, stock in products:
-            c.execute('INSERT INTO products (name, description, price, image_url, stock, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-                      (name, desc, price, img, stock, datetime.now()))
+        for r in rows:
+            c.execute('''INSERT INTO products
+                         (name,description,price,image_url,stock,max_qty,delivery_fee,created_at)
+                         VALUES (?,?,?,?,?,?,?,?)''', (*r, datetime.now()))
     conn.commit()
     conn.close()
 
-@app.route('/api/health', methods=['GET'])
+# ── HEALTH ────────────────────────────────────────────────────────────
+@app.route('/api/health')
 def health():
-    return jsonify({'status': 'ok', 'message': 'Server is running'})
+    return jsonify({'status': 'ok'})
 
+# ── AUTH: ADMIN LOGIN ─────────────────────────────────────────────────
 @app.route('/api/auth/admin-login', methods=['POST'])
 def admin_login():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
-        return jsonify({'error': 'Username and password required'}), 400
+    d = request.json or {}
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('SELECT id, username, password, role FROM users WHERE username=? AND role=?', (username, 'admin'))
+    c.execute('SELECT id,username,password,role FROM users WHERE username=? AND role="admin"', (d.get('username'),))
     user = c.fetchone()
     conn.close()
-    if user and check_password_hash(user[2], password):
-        session['user_id'] = user[0]
+    
+    if user and check_password_hash(user[2], d.get('password','')):
+        session['user_id']  = user[0]
         session['username'] = user[1]
-        session['role'] = user[3]
-        return jsonify({'success': True, 'message': 'Admin login successful', 'role': 'admin', 'user_id': user[0]})
+        session['role']     = user[3]
+        session.modified = True  # ✅ ADD THIS LINE
+        
+        print(f"✅ Admin login successful: user_id={user[0]}, role={user[3]}")
+        print(f"✅ Session data: {dict(session)}")
+        
+        return jsonify({'success': True, 'role': 'admin', 'user_id': user[0]})
+    
+    print(f"❌ Admin login failed for user: {d.get('username')}")
     return jsonify({'error': 'Invalid credentials'}), 401
 
+# ── AUTH: CUSTOMER LOGIN (phone + password) ───────────────────────────
+@app.route('/api/auth/customer-login', methods=['POST'])
+def customer_login():
+    d     = request.json or {}
+    phone = d.get('phone', '').strip()
+    pwd   = d.get('password', '').strip()
+    if not phone or not pwd:
+        return jsonify({'error': 'Phone and password required'}), 400
+
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('SELECT id,password,address,pincode,apartment FROM users WHERE phone=? AND role="customer"', (phone,))
+    user = c.fetchone()
+    conn.close()
+
+    if not user or not check_password_hash(user[1], pwd):
+        return jsonify({'error': 'Invalid phone or password'}), 401
+
+    session['user_id'] = user[0]
+    session['phone']   = phone
+    session['role']    = 'customer'
+    saved = {'address': user[2], 'pincode': user[3], 'apartment': user[4]} if user[2] else None
+    return jsonify({'success': True, 'role': 'customer', 'user_id': user[0], 'saved_address': saved})
+
+# ── AUTH: REGISTER (phone + password) ────────────────────────────────
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    d     = request.json or {}
+    phone = d.get('phone', '').strip()
+    pwd   = d.get('password', '').strip()
+    if not phone or not phone.isdigit() or len(phone) != 10 or phone[0] not in '6789':
+        return jsonify({'error': 'Enter a valid 10-digit Indian mobile number'}), 400
+    if not pwd or len(pwd) < 4:
+        return jsonify({'error': 'Password must be at least 4 characters'}), 400
+
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('SELECT id FROM users WHERE phone=?', (phone,))
+    if c.fetchone():
+        conn.close()
+        return jsonify({'error': 'This mobile number is already registered. Please login.'}), 409
+    c.execute('INSERT INTO users (username,password,phone,role,created_at) VALUES (?,?,?,?,?)',
+              (f'user_{phone}', generate_password_hash(pwd), phone, 'customer', datetime.now()))
+    conn.commit()
+    uid = c.lastrowid
+    conn.close()
+    session['user_id'] = uid
+    session['phone']   = phone
+    session['role']    = 'customer'
+    return jsonify({'success': True, 'role': 'customer', 'user_id': uid})
+
+# ── AUTH: REQUEST OTP (kept for fallback if SMS key is set) ──────────
 @app.route('/api/auth/request-otp', methods=['POST'])
 def request_otp():
-    data = request.json
-    phone = data.get('phone')
-    if not phone or not phone.isdigit() or len(phone) < 10:
-        return jsonify({'error': 'Valid phone number required'}), 400
-    otp = ''.join(random.choices(string.digits, k=6))
+    phone = (request.json or {}).get('phone', '').strip()
+    if not phone or not phone.isdigit() or len(phone) != 10 or phone[0] not in '6789':
+        return jsonify({'error': 'Enter a valid 10-digit Indian mobile number'}), 400
+    otp = ''.join(random.choices(string.digits, k=4))
     expires_at = datetime.now() + timedelta(minutes=5)
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
     c.execute('DELETE FROM otp WHERE phone=?', (phone,))
-    c.execute('INSERT INTO otp (phone, otp, expires_at, created_at) VALUES (?, ?, ?, ?)',
+    c.execute('INSERT INTO otp (phone,otp,expires_at,created_at) VALUES (?,?,?,?)',
               (phone, otp, expires_at, datetime.now()))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'message': f'OTP sent to {phone}', 'otp': otp})
+    sms_sent  = False
+    sms_error = ''
+    try:
+        resp = requests.post(
+            'https://www.fast2sms.com/dev/bulkV2',
+            headers={'authorization': FAST2SMS_API_KEY},
+            json={'route':'otp','variables_values':otp,'numbers':phone,'flash':0},
+            timeout=10)
+        result   = resp.json()
+        sms_sent = result.get('return', False)
+        if not sms_sent:
+            sms_error = str(result.get('message', 'SMS failed'))
+    except Exception as e:
+        sms_error = str(e)
+    res = {'success': True, 'message': f'OTP sent to +91-{phone}'}
+    if not sms_sent:
+        res['otp']       = otp
+        res['sms_error'] = sms_error
+    return jsonify(res)
 
+# ── AUTH: VERIFY OTP ──────────────────────────────────────────────────
 @app.route('/api/auth/verify-otp', methods=['POST'])
 def verify_otp():
-    data = request.json
-    phone = data.get('phone')
-    otp = data.get('otp')
+    d     = request.json or {}
+    phone = d.get('phone', '').strip()
+    otp   = d.get('otp',   '').strip()
     if not phone or not otp:
         return jsonify({'error': 'Phone and OTP required'}), 400
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('SELECT otp, expires_at FROM otp WHERE phone=? ORDER BY created_at DESC LIMIT 1', (phone,))
-    otp_record = c.fetchone()
-    if not otp_record or otp_record[0] != otp:
+    c.execute('SELECT otp,expires_at FROM otp WHERE phone=? ORDER BY created_at DESC LIMIT 1', (phone,))
+    rec = c.fetchone()
+    if not rec or rec[0] != otp:
         conn.close()
         return jsonify({'error': 'Invalid OTP'}), 401
-    if datetime.fromisoformat(otp_record[1]) < datetime.now():
+    if datetime.fromisoformat(rec[1]) < datetime.now():
         conn.close()
-        return jsonify({'error': 'OTP expired'}), 401
-    c.execute('SELECT id FROM users WHERE phone=?', (phone,))
+        return jsonify({'error': 'OTP expired. Request a new one.'}), 401
+    c.execute('SELECT id,address,pincode,apartment FROM users WHERE phone=?', (phone,))
     user = c.fetchone()
     if not user:
-        c.execute('INSERT INTO users (username, phone, role, created_at) VALUES (?, ?, ?, ?)',
-                  (f'customer_{phone}', phone, 'customer', datetime.now()))
+        c.execute('INSERT INTO users (username,phone,role,created_at) VALUES (?,?,?,?)',
+                  (f'user_{phone}', phone, 'customer', datetime.now()))
         conn.commit()
-        user_id = c.lastrowid
+        user_id, saved = c.lastrowid, None
     else:
         user_id = user[0]
+        saved   = {'address': user[1], 'pincode': user[2], 'apartment': user[3]} if user[1] else None
     c.execute('DELETE FROM otp WHERE phone=?', (phone,))
     conn.commit()
     conn.close()
     session['user_id'] = user_id
-    session['phone'] = phone
-    session['role'] = 'customer'
-    return jsonify({'success': True, 'message': 'Login successful', 'role': 'customer', 'user_id': user_id})
+    session['phone']   = phone
+    session['role']    = 'customer'
+    return jsonify({'success': True, 'role': 'customer', 'user_id': user_id, 'saved_address': saved})
 
+# ── AUTH: SAVE ADDRESS ────────────────────────────────────────────────
+@app.route('/api/auth/save-address', methods=['POST'])
+def save_address():
+    uid = get_user_id()
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+    d = request.json or {}
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('UPDATE users SET address=?,pincode=?,apartment=? WHERE id=?',
+              (d.get('address'), d.get('pincode'), d.get('apartment'), uid))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+# ── AUTH: LOGOUT ──────────────────────────────────────────────────────
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
     session.clear()
-    return jsonify({'success': True, 'message': 'Logged out'})
+    return jsonify({'success': True})
 
-@app.route('/api/auth/session', methods=['GET'])
-def get_session_info():
-    if 'user_id' in session:
-        return jsonify({'authenticated': True, 'user_id': session.get('user_id'), 'username': session.get('username'), 'role': session.get('role')})
-    return jsonify({'authenticated': False})
+# ── ADMIN: ALL USERS ──────────────────────────────────────────────────
+@app.route('/api/admin/users')
+def admin_get_users():
+    if not is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('''SELECT id,username,phone,role,created_at,address,pincode,apartment
+                 FROM users WHERE role != "admin" ORDER BY created_at DESC''')
+    cols  = ['id','username','phone','role','created_at','address','pincode','apartment']
+    users = [dict(zip(cols, row)) for row in c.fetchall()]
+    conn.close()
+    return jsonify(users)
 
-@app.route('/api/products', methods=['GET'])
+# ── PRODUCTS: LIST ────────────────────────────────────────────────────
+@app.route('/api/products')
 def get_products():
     conn = sqlite3.connect('ecommerce.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('SELECT * FROM products')
-    products = [dict(row) for row in c.fetchall()]
+    c.execute('SELECT * FROM products ORDER BY id')
+    products = [dict(r) for r in c.fetchall()]
     conn.close()
     return jsonify(products)
 
-@app.route('/api/products/<int:product_id>', methods=['GET'])
-def get_product(product_id):
+# ── PRODUCTS: ADD ─────────────────────────────────────────────────────
+@app.route('/api/products', methods=['POST'])
+def add_product():
+    if not is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+    d = request.json or {}
+    name = d.get('name','').strip()
+    if not name or not d.get('price'):
+        return jsonify({'error': 'Name and price required'}), 400
     conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('''INSERT INTO products
+                 (name,description,price,image_url,stock,max_qty,delivery_fee,created_at)
+                 VALUES (?,?,?,?,?,?,?,?)''',
+              (name, d.get('description',''), float(d['price']),
+               d.get('image_url',''), int(d.get('stock',0)),
+               int(d.get('max_qty',10)), float(d.get('delivery_fee',40.0)),
+               datetime.now()))
+    new_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'id': new_id})
+
+# ── PRODUCTS: UPDATE ──────────────────────────────────────────────────
+@app.route('/api/products/<int:pid>', methods=['PUT'])
+def update_product(pid):
+    if not is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+    d = request.json or {}
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('''UPDATE products
+                 SET name=?,description=?,price=?,image_url=?,stock=?,max_qty=?,delivery_fee=?
+                 WHERE id=?''',
+              (d.get('name'), d.get('description'), float(d.get('price',0)),
+               d.get('image_url',''), int(d.get('stock',0)),
+               int(d.get('max_qty',10)), float(d.get('delivery_fee',40.0)), pid))
+    conn.commit()
+    
+    # Fetch and return the updated product
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('SELECT * FROM products WHERE id=?', (product_id,))
-    product = c.fetchone()
+    c.execute('SELECT * FROM products WHERE id=?', (pid,))
+    updated_product = c.fetchone()
     conn.close()
-    if product:
-        return jsonify(dict(product))
-    return jsonify({'error': 'Product not found'}), 404
+    
+    if updated_product:
+        return jsonify({'success': True, 'product': dict(updated_product)})
+    else:
+        return jsonify({'error': 'Product not found after update'}), 404
 
-@app.route('/api/cart', methods=['GET'])
+# ── PRODUCTS: DELETE ──────────────────────────────────────────────────
+@app.route('/api/products/<int:pid>', methods=['DELETE'])
+def delete_product(pid):
+    if not is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM cart WHERE product_id=?', (pid,))
+    c.execute('DELETE FROM products WHERE id=?', (pid,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+# ── CART ──────────────────────────────────────────────────────────────
+@app.route('/api/cart')
 def get_cart():
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
     conn = sqlite3.connect('ecommerce.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('''SELECT c.id, c.product_id, c.quantity, p.name, p.price, p.image_url
-                 FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id=?''', (user_id,))
-    cart_items = [dict(row) for row in c.fetchall()]
+    c.execute('''SELECT c.id,c.product_id,c.quantity,p.name,p.price,p.image_url
+                 FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?''', (uid,))
+    items = [dict(r) for r in c.fetchall()]
     conn.close()
-    total = sum(item['quantity'] * item['price'] for item in cart_items)
-    return jsonify({'items': cart_items, 'total': round(total, 2), 'count': len(cart_items)})
+    return jsonify({'items': items,
+                    'total': round(sum(i['quantity']*i['price'] for i in items), 2),
+                    'count': len(items)})
 
 @app.route('/api/cart/add', methods=['POST'])
 def add_to_cart():
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
-    data = request.json
-    product_id = data.get('product_id')
-    quantity = data.get('quantity', 1)
-    if not product_id or quantity < 1:
-        return jsonify({'error': 'Invalid product or quantity'}), 400
+    d   = request.json or {}
+    pid = d.get('product_id')
+    qty = int(d.get('quantity', 1))
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('SELECT stock FROM products WHERE id=?', (product_id,))
-    product = c.fetchone()
-    if not product or product[0] < quantity:
+    c.execute('SELECT stock,max_qty FROM products WHERE id=?', (pid,))
+    p = c.fetchone()
+    if not p:
         conn.close()
-        return jsonify({'error': 'Product not available'}), 400
-    c.execute('SELECT id, quantity FROM cart WHERE user_id=? AND product_id=?', (user_id, product_id))
-    cart_item = c.fetchone()
-    if cart_item:
-        c.execute('UPDATE cart SET quantity=? WHERE id=?', (cart_item[1] + quantity, cart_item[0]))
+        return jsonify({'error': 'Product not found'}), 404
+    stock, max_qty = p
+    c.execute('SELECT id,quantity FROM cart WHERE user_id=? AND product_id=?', (uid, pid))
+    existing = c.fetchone()
+    new_qty  = (existing[1] if existing else 0) + qty
+    if new_qty > max_qty:
+        conn.close()
+        return jsonify({'error': f'Maximum {max_qty} items allowed for this product'}), 400
+    if new_qty > stock:
+        conn.close()
+        return jsonify({'error': 'Not enough stock'}), 400
+    if existing:
+        c.execute('UPDATE cart SET quantity=? WHERE id=?', (new_qty, existing[0]))
     else:
-        c.execute('INSERT INTO cart (user_id, product_id, quantity, added_at) VALUES (?, ?, ?, ?)',
-                  (user_id, product_id, quantity, datetime.now()))
+        c.execute('INSERT INTO cart (user_id,product_id,quantity,added_at) VALUES (?,?,?,?)',
+                  (uid, pid, qty, datetime.now()))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'message': 'Product added to cart'})
+    return jsonify({'success': True})
 
 @app.route('/api/cart/update/<int:cart_id>', methods=['PUT'])
 def update_cart(cart_id):
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
-    data = request.json
-    quantity = data.get('quantity')
-    if quantity is None or quantity < 0:
-        return jsonify({'error': 'Invalid quantity'}), 400
+    qty = int((request.json or {}).get('quantity', 0))
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    if quantity == 0:
+    if qty <= 0:
         c.execute('DELETE FROM cart WHERE id=?', (cart_id,))
     else:
-        c.execute('UPDATE cart SET quantity=? WHERE id=?', (quantity, cart_id))
+        c.execute('UPDATE cart SET quantity=? WHERE id=?', (qty, cart_id))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'message': 'Cart updated'})
+    return jsonify({'success': True})
 
 @app.route('/api/cart/remove/<int:cart_id>', methods=['DELETE'])
 def remove_from_cart(cart_id):
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
     c.execute('DELETE FROM cart WHERE id=?', (cart_id,))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'message': 'Item removed'})
+    return jsonify({'success': True})
 
 @app.route('/api/cart/clear', methods=['DELETE'])
 def clear_cart():
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('DELETE FROM cart WHERE user_id=?', (user_id,))
+    c.execute('DELETE FROM cart WHERE user_id=?', (uid,))
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'message': 'Cart cleared'})
+    return jsonify({'success': True})
 
+# ── ORDERS: CREATE (pending payment) ─────────────────────────────────
 @app.route('/api/orders/create', methods=['POST'])
 def create_order():
-    user_id = get_user_id()
-    if not user_id:
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
-    data = request.json
-    payment_method = data.get('payment_method', 'credit_card')
+    d            = request.json or {}
+    delivery_fee = float(d.get('delivery_fee', 0))
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('''SELECT c.product_id, c.quantity, p.price, p.stock
-                 FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id=?''', (user_id,))
-    cart_items = c.fetchall()
-    if not cart_items:
+    c.execute('''SELECT c.product_id,c.quantity,p.price,p.stock
+                 FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?''', (uid,))
+    items = c.fetchall()
+    if not items:
         conn.close()
         return jsonify({'error': 'Cart is empty'}), 400
-    total = sum(item[1] * item[2] for item in cart_items)
-    for product_id, quantity, price, stock in cart_items:
-        if stock < quantity:
+    for pid, qty, price, stock in items:
+        if stock < qty:
             conn.close()
-            return jsonify({'error': f'Insufficient stock'}), 400
-    c.execute('INSERT INTO orders (user_id, total_amount, status, payment_method, created_at) VALUES (?, ?, ?, ?, ?)',
-              (user_id, total, 'pending', payment_method, datetime.now()))
-    order_id = c.lastrowid
-    for product_id, quantity, price, stock in cart_items:
-        c.execute('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
-                  (order_id, product_id, quantity, price))
-        c.execute('UPDATE products SET stock = stock - ? WHERE id=?', (quantity, product_id))
-    c.execute('DELETE FROM cart WHERE user_id=?', (user_id,))
+            return jsonify({'error': 'Insufficient stock'}), 400
+    subtotal = sum(qty*price for _,qty,price,_ in items)
+    total    = subtotal + delivery_fee
+    # Create order with payment_status = 'pending'
+    c.execute('''INSERT INTO orders
+                 (user_id,total_amount,status,payment_method,payment_status,created_at)
+                 VALUES (?,?,?,?,?,?)''',
+              (uid, total, 'awaiting_payment', 'gpay', 'pending', datetime.now()))
+    oid = c.lastrowid
+    for pid, qty, price, _ in items:
+        c.execute('INSERT INTO order_items (order_id,product_id,quantity,price) VALUES (?,?,?,?)',
+                  (oid, pid, qty, price))
+    # NOTE: stock is NOT deducted yet — only after payment confirmation
     conn.commit()
     conn.close()
-    return jsonify({'success': True, 'order_id': order_id, 'total_amount': total})
+    return jsonify({'success': True, 'order_id': oid, 'total_amount': total})
 
-@app.route('/api/orders/process-payment', methods=['POST'])
-def process_payment():
-    data = request.json
-    order_id = data.get('order_id')
-    if not order_id:
-        return jsonify({'error': 'Order ID required'}), 400
-    conn = sqlite3.connect('ecommerce.db')
-    c = conn.cursor()
-    c.execute('UPDATE orders SET status=? WHERE id=?', ('completed', order_id))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True, 'order_id': order_id, 'transaction_id': f"TXN_{order_id}"})
-
-@app.route('/api/orders', methods=['GET'])
-def get_orders():
-    user_id = get_user_id()
-    if not user_id:
+# ── ORDERS: CONFIRM PAYMENT ───────────────────────────────────────────
+@app.route('/api/orders/confirm-payment', methods=['POST'])
+def confirm_payment():
+    uid = get_user_id()
+    if not uid:
         return jsonify({'error': 'Unauthorized'}), 401
+    d       = request.json or {}
+    oid     = d.get('order_id')
+    upi_ref = d.get('upi_ref', '').strip()
+    if not oid or not upi_ref:
+        return jsonify({'error': 'Order ID and UPI reference required'}), 400
     conn = sqlite3.connect('ecommerce.db')
-    conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('''SELECT o.id, o.total_amount, o.status, o.payment_method, o.created_at
-                 FROM orders o WHERE o.user_id=? ORDER BY o.created_at DESC''', (user_id,))
-    orders = [dict(row) for row in c.fetchall()]
-    conn.close()
-    return jsonify(orders)
-
-@app.route('/api/orders/<int:order_id>', methods=['GET'])
-def get_order(order_id):
-    user_id = get_user_id()
-    if not user_id:
-        return jsonify({'error': 'Unauthorized'}), 401
-    conn = sqlite3.connect('ecommerce.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute('SELECT * FROM orders WHERE id=? AND user_id=?', (order_id, user_id))
+    # Verify order belongs to this user and is still pending
+    c.execute('SELECT id,total_amount,payment_status FROM orders WHERE id=? AND user_id=?', (oid, uid))
     order = c.fetchone()
     if not order:
         conn.close()
         return jsonify({'error': 'Order not found'}), 404
-    c.execute('''SELECT oi.product_id, oi.quantity, oi.price, p.name, p.image_url
-                 FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id=?''', (order_id,))
-    items = [dict(row) for row in c.fetchall()]
+    if order[2] == 'paid':
+        conn.close()
+        return jsonify({'error': 'Order already paid'}), 400
+    # Mark as paid, deduct stock, clear cart
+    c.execute('UPDATE orders SET status=?,payment_status=?,upi_ref=? WHERE id=?',
+              ('confirmed', 'paid', upi_ref, oid))
+    c.execute('SELECT product_id,quantity FROM order_items WHERE order_id=?', (oid,))
+    for pid, qty in c.fetchall():
+        c.execute('UPDATE products SET stock=stock-? WHERE id=?', (qty, pid))
+    c.execute('DELETE FROM cart WHERE user_id=?', (uid,))
+    conn.commit()
     conn.close()
-    return jsonify({'order': dict(order), 'items': items})
+    return jsonify({'success': True, 'order_id': oid, 'message': 'Payment confirmed, order placed!'})
+
+# ── ORDERS: LIST ─────────────────────────────────────────────────────
+@app.route('/api/orders')
+def get_orders():
+    uid = get_user_id()
+    if not uid:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('ecommerce.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC', (uid,))
+    orders = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return jsonify(orders)
 
 if __name__ == '__main__':
     init_db()
