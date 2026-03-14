@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProShop - E-Commerce Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --border: #bdc3c7;
+            --text: #34495e;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        header .right {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+        }
+
+        .user-info strong {
+            color: var(--dark);
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Login Styles */
+        .login-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .login-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-error {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--light);
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        .cart-sidebar.show {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .cart-header {
+            padding: 1.5rem;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .cart-items {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .cart-item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .cart-item-price {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .cart-item-qty {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .cart-item-qty button {
+            background: var(--border);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cart-item-qty button:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text);
+        }
+
+        .cart-empty p {
+            margin-bottom: 16px;
+        }
+
+        .cart-footer {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .checkout-btn:hover {
+            background: #229954;
+        }
+
+        .checkout-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+
+        /* Checkout Page */
+        .checkout-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .checkout-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .delivery-check {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .delivery-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .delivery-status.show {
+            display: block;
+        }
+
+        .delivery-available {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .delivery-unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .order-summary {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-top: 1.5rem;
+        }
+
+        .order-summary h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .summary-items {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .summary-items li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--success);
+            border-top: 2px solid var(--border);
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid #c3e6cb;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .cart-sidebar {
+                width: 100%;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            header .right {
+                gap: 1rem;
+            }
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🛍️ ProShop</div>
+        <div class="right">
+            <div class="user-info">
+                <span id="userDisplay">Welcome</span>
+                <button class="btn btn-danger" onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+            <div class="cart-icon" onclick="toggleCart()">
+                🛒
+                <span class="cart-badge" id="cartBadge">0</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- LOGIN PAGE -->
+        <div id="login" class="page active">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1>Welcome to ProShop</h1>
+                    <p>Sign in to continue shopping</p>
+                </div>
+
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="switchLoginTab('admin')">Admin Login</button>
+                    <button class="login-tab" onclick="switchLoginTab('customer')">Customer Login</button>
+                </div>
+
+                <!-- Admin Login -->
+                <div id="adminForm" class="login-form active">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="adminUsername" placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter password">
+                    </div>
+                    <div id="adminError" class="form-error"></div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="adminLogin()">Login</button>
+                    <p style="font-size: 12px; color: var(--text); margin-top: 16px; text-align: center;">Demo: admin / admin123</p>
+                </div>
+
+                <!-- Customer Login -->
+                <div id="customerForm" class="login-form" style="display: none;">
+                    <div id="phoneSection">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="customerPhone" placeholder="+1234567890">
+                        </div>
+                        <div id="phoneError" class="form-error"></div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="requestOTP()">Send OTP</button>
+                    </div>
+
+                    <div id="otpSection" style="display: none;">
+                        <div class="form-group">
+                            <label>Enter OTP</label>
+                            <input type="text" id="otpInput" placeholder="6-digit OTP" maxlength="6">
+                        </div>
+                        <div id="otpError" class="form-error"></div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="verifyOTP()">Verify OTP</button>
+                        <button class="btn" style="width: 100%; margin-top: 8px;" onclick="backToPhone()">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME PAGE (Products) -->
+        <div id="home" class="page">
+            <h2 class="section-title">Featured Products</h2>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
+        <!-- CHECKOUT PAGE -->
+        <div id="checkout" class="page">
+            <div class="checkout-container">
+                <h2 class="section-title">Checkout</h2>
+                
+                <!-- PINCODE DELIVERY CHECK - CONFIGURATION SECTION -->
+                <!-- ========== START: PINCODE CONFIGURATION ========== -->
+                <!-- Edit the deliveryPincodes array below to add/remove pincodes -->
+                <!-- Format: { pincode: "6-digit", city: "City Name", state: "State", days: "2-3", charge: 50 } -->
+                <div class="delivery-check">
+                    <h3>📍 Delivery Address</h3>
+                    
+                    <div class="form-group">
+                        <label>Pincode (6 digits)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="pincode" placeholder="Enter 6-digit pincode" maxlength="6" style="flex: 1;">
+                            <button class="btn btn-primary" onclick="checkPincodeDelivery()">Check</button>
+                        </div>
+                    </div>
+
+                    <div id="deliveryStatus" class="delivery-status"></div>
+
+                    <div class="form-group">
+                        <label>Full Address</label>
+                        <input type="text" id="address" placeholder="Enter full delivery address">
+                    </div>
+                </div>
+                <!-- ========== END: PINCODE CONFIGURATION ========== -->
+
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="name" placeholder="Full name">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="phone" placeholder="Phone number">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Email address">
+                </div>
+
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <ul class="summary-items" id="summaryItems"></ul>
+                    <div class="summary-total">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">₹0.00</span>
+                    </div>
+                    <div class="summary-total" style="color: var(--warning); font-size: 1rem;">
+                        <span>Delivery Charge:</span>
+                        <span id="deliveryCharge">₹0.00</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total:</span>
+                        <span id="totalAmount">₹0.00</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-success" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem;" onclick="placeOrder()">Place Order</button>
+                <button class="btn" style="width: 100%; padding: 0.8rem; margin-top: 0.5rem;" onclick="backToHome()">Continue Shopping</button>
+            </div>
+        </div>
+
+        <!-- ORDER CONFIRMATION PAGE -->
+        <div id="confirmation" class="page">
+            <div class="checkout-container">
+                <div class="success-message show">
+                    <h3>✅ Order Placed Successfully!</h3>
+                    <p id="confirmationMessage"></p>
+                    <p>Order ID: <strong id="orderId"></strong></p>
+                    <p>Estimated Delivery: <strong id="estimatedDelivery"></strong></p>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="backToHome()">Continue Shopping</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART SIDEBAR -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <span>Shopping Cart</span>
+            <button class="cart-close" onclick="toggleCart()">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="cart-empty">
+                <p>Your cart is empty</p>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₹0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURATION - EDIT HERE ====================
+        // 📌 PINCODE DELIVERY CONFIGURATION
+        // Add or remove pincodes below. Format:
+        // { pincode: "6-digit-number", city: "City Name", state: "State", days: "2-3 days", charge: amount }
+        
+        const deliveryPincodes = [
+            { pincode: "110001", city: "New Delhi", state: "Delhi", days: "2-3 days", charge: 50 },
+            { pincode: "110002", city: "New Delhi", state: "Delhi", days: "2-3 days", charge: 50 },
+            { pincode: "560001", city: "Bangalore", state: "Karnataka", days: "3-5 days", charge: 100 },
+            { pincode: "560002", city: "Bangalore", state: "Karnataka", days: "3-5 days", charge: 100 },
+            { pincode: "400001", city: "Mumbai", state: "Maharashtra", days: "2-3 days", charge: 75 },
+            { pincode: "400002", city: "Mumbai", state: "Maharashtra", days: "2-3 days", charge: 75 },
+            { pincode: "700001", city: "Kolkata", state: "West Bengal", days: "4-6 days", charge: 120 },
+            { pincode: "700002", city: "Kolkata", state: "West Bengal", days: "4-6 days", charge: 120 },
+            { pincode: "500001", city: "Hyderabad", state: "Telangana", days: "3-5 days", charge: 90 },
+            { pincode: "500002", city: "Hyderabad", state: "Telangana", days: "3-5 days", charge: 90 }
+        ];
+        // ==================== END CONFIGURATION ====================
+
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let cartItems = [];
+        let cartTotal = 0;
+        let selectedDeliveryCharge = 0;
+
+        // Page navigation
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+        }
+
+        // Auth functions
+        function switchLoginTab(tab) {
+            document.querySelectorAll('.login-tab').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.login-form').forEach(el => el.classList.remove('active'));
+            
+            if (tab === 'admin') {
+                document.querySelector('[onclick*="admin"]').classList.add('active');
+                document.getElementById('adminForm').classList.add('active');
+            } else {
+                document.querySelector('[onclick*="customer"]').classList.add('active');
+                document.getElementById('customerForm').classList.add('active');
+            }
+        }
+
+        async function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (!username || !password) {
+                showError('adminError', 'Username and password required');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/admin-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    currentUser = { role: 'admin', username, user_id: data.user_id };
+                    updateUserUI();
+                    loadProducts();
+                    showPage('home');
+                } else {
+                    showError('adminError', data.error || 'Login failed');
+                }
+            } catch (error) {
+                showError('adminError', 'Login error: ' + error.message);
+            }
+        }
+
+        function updateUserUI() {
+            const userDisplay = document.getElementById('userDisplay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (currentUser) {
+                userDisplay.innerHTML = `Welcome, <strong>${currentUser.username}</strong>`;
+                logoutBtn.style.display = 'block';
+            } else {
+                userDisplay.innerHTML = 'Welcome';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            cartItems = [];
+            cartTotal = 0;
+            updateUserUI();
+            updateCartBadge();
+            showPage('login');
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/products`);
+                const products = await response.json();
+                
+                const grid = document.getElementById('productsGrid');
+                grid.innerHTML = products.map(p => `
+                    <div class="product-card">
+                        <img src="${p.image_url}" alt="${p.name}" class="product-image">
+                        <div class="product-info">
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-price">₹${p.price}</div>
+                            <button class="btn btn-primary add-to-cart-btn" onclick="addToCart(${p.id}, '${p.name}', ${p.price}, '${p.image_url}')">Add to Cart</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function addToCart(id, name, price, image) {
+            cartItems.push({ id, name, price, image, quantity: 1 });
+            cartTotal += price;
+            updateCart();
+            alert(`${name} added to cart!`);
+        }
+
+        function updateCart() {
+            updateCartBadge();
+            const cartDiv = document.getElementById('cartItems');
+            
+            if (cartItems.length === 0) {
+                cartDiv.innerHTML = '<div class="cart-empty"><p>Your cart is empty</p></div>';
+                return;
+            }
+
+            cartDiv.innerHTML = cartItems.map((item, index) => `
+                <div class="cart-item">
+                    <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">₹${item.price}</div>
+                        <div class="cart-item-qty">
+                            <button onclick="changeQty(${index}, -1)">−</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="changeQty(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('cartTotal').innerText = `₹${cartTotal.toFixed(2)}`;
+        }
+
+        function changeQty(index, delta) {
+            cartItems[index].quantity += delta;
+            if (cartItems[index].quantity <= 0) {
+                cartItems.splice(index, 1);
+            }
+            cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            updateCart();
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cartBadge').innerText = cartItems.length;
+        }
+
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('show');
+        }
+
+        // ==================== CHECKOUT FUNCTIONS ====================
+        // 🔧 FIXED: CHECKOUT FUNCTION - NOW PROPERLY CHECKS AUTHENTICATION
+
+        async function proceedToCheckout() {
+            // Check if user is logged in
+            if (!currentUser || !currentUser.user_id) {
+                alert('Please login to checkout');
+                toggleCart();
+                showPage('login');
+                return;
+            }
+
+            // Check if cart has items
+            if (cartItems.length === 0) {
+                alert('Your cart is empty! Add products first.');
+                return;
+            }
+
+            // Display checkout with summary
+            updateCheckoutSummary();
+            toggleCart();
+            showPage('checkout');
+        }
+
+        function updateCheckoutSummary() {
+            const summaryItems = document.getElementById('summaryItems');
+            let subtotal = 0;
+
+            summaryItems.innerHTML = cartItems.map(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                return `<li><span>${item.name} x${item.quantity}</span><span>₹${itemTotal.toFixed(2)}</span></li>`;
+            }).join('');
+
+            document.getElementById('subtotal').innerText = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('deliveryCharge').innerText = `₹${selectedDeliveryCharge.toFixed(2)}`;
+            document.getElementById('totalAmount').innerText = `₹${(subtotal + selectedDeliveryCharge).toFixed(2)}`;
+        }
+
+        // ==================== PINCODE DELIVERY CHECK FUNCTION ====================
+        // 🔧 PINCODE CHECK: Searches deliveryPincodes array
+        
+        function checkPincodeDelivery() {
+            const pincode = document.getElementById('pincode').value.trim();
+            const statusDiv = document.getElementById('deliveryStatus');
+
+            if (!pincode || pincode.length !== 6 || isNaN(pincode)) {
+                statusDiv.innerHTML = '<p style="color: var(--danger);">❌ Please enter a valid 6-digit pincode</p>';
+                statusDiv.classList.add('show');
+                selectedDeliveryCharge = 0;
+                updateCheckoutSummary();
+                return;
+            }
+
+            // Search in deliveryPincodes array
+            const pincodeData = deliveryPincodes.find(p => p.pincode === pincode);
+
+            if (pincodeData) {
+                statusDiv.className = 'delivery-status show delivery-available';
+                statusDiv.innerHTML = `
+                    <p><strong>✅ Delivery Available!</strong></p>
+                    <p><strong>City:</strong> ${pincodeData.city}, ${pincodeData.state}</p>
+                    <p><strong>Estimated Delivery:</strong> ${pincodeData.days}</p>
+                    <p><strong>Delivery Charge:</strong> ₹${pincodeData.charge}</p>
+                `;
+                selectedDeliveryCharge = pincodeData.charge;
+            } else {
+                statusDiv.className = 'delivery-status show delivery-unavailable';
+                statusDiv.innerHTML = `
+                    <p><strong>❌ Delivery Not Available</strong></p>
+                    <p>Sorry! We don't deliver to this pincode yet.</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">Available pincodes: ${deliveryPincodes.map(p => p.pincode).join(', ')}</p>
+                `;
+                selectedDeliveryCharge = 0;
+            }
+
+            updateCheckoutSummary();
+        }
+
+        async function placeOrder() {
+            if (!document.getElementById('pincode').value) {
+                alert('Please check delivery pincode first');
+                return;
+            }
+
+            if (!document.getElementById('address').value || !document.getElementById('name').value) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const pincodeData = deliveryPincodes.find(p => p.pincode === document.getElementById('pincode').value);
+            if (!pincodeData) {
+                alert('Please select a valid pincode');
+                return;
+            }
+
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal + selectedDeliveryCharge;
+
+            // Show confirmation
+            const orderId = 'ORD' + Date.now();
+            document.getElementById('orderId').innerText = orderId;
+            document.getElementById('estimatedDelivery').innerText = pincodeData.days;
+            document.getElementById('confirmationMessage').innerText = 
+                `Thank you for your order! Total: ₹${total.toFixed(2)} will be delivered to ${pincodeData.city}, ${pincodeData.state}`;
+
+            // Clear cart
+            cartItems = [];
+            cartTotal = 0;
+            updateCart();
+
+            showPage('confirmation');
+        }
+
+        function backToHome() {
+            showPage('home');
+        }
+
+        function backToCart() {
+            showPage('checkout');
+        }
+
+        function showError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
+            errorEl.innerText = message;
+            errorEl.classList.add('show');
+        }
+
+        // OTP functions
+        async function requestOTP() {
+            const phone = document.getElementById('customerPhone').value;
+            if (!phone || phone.length < 10) {
+                showError('phoneError', 'Please enter a valid phone number');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/request-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(`OTP sent! (Demo: ${data.otp})`);
+                    document.getElementById('phoneSection').style.display = 'none';
+                    document.getElementById('otpSection').style.display = 'block';
+                }
+            } catch (error) {
+                showError('phoneError', error.message);
+            }
+        }
+
+        function backToPhone() {
+            document.getElementById('phoneSection').style.display = 'block';
+            document.getElementById('otpSection').style.display = 'none';
+        }
+
+        async function verifyOTP() {
+            const phone = document.getElementById('customerPhone').value;
+            const otp = document.getElementById('otpInput').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ phone, otp })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = { role: 'customer', phone, user_id: data.user_id };
+                    updateUserUI();
+                    loadProducts();
+                    showPage('home');
+                } else {
+                    showError('otpError', data.error || 'Verification failed');
+                }
+            } catch (error) {
+                showError('otpError', error.message);
+            }
+        }
+
+        // Initialize
+        loadProducts();
+    </script>
+</body>
+</html>
