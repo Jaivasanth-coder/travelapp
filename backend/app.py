@@ -5,19 +5,43 @@ import sqlite3
 import random
 import string
 import requests
+import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = 'proshop-secret-2024'
 
-# ── CORS: wildcard origins, no credentials needed (using headers) ─────
+# ── CONFIG: all secrets from environment variables ─────────────────────
+# Set these in Render Dashboard → Your Service → Environment tab.
+# For local dev, export them in your shell or use a .env file.
+#
+#   PROSHOP_SECRET_KEY   → any long random string
+#   FAST2SMS_API_KEY     → your Fast2SMS API key
+#   ALLOWED_ORIGINS      → comma-separated list of allowed frontend URLs
+#                          e.g. https://your-app.onrender.com,https://yourdomain.com
+#                          leave unset (or set to *) during development
+#
+app.secret_key = os.environ.get('PROSHOP_SECRET_KEY', 'change-me-in-production')
+
+FAST2SMS_API_KEY = os.environ.get('FAST2SMS_API_KEY', '')
+
+# ── CORS ───────────────────────────────────────────────────────────────
+# On Render both the Flask API and the static index.html are served from
+# the same origin, so CORS is only needed during local development where
+# the frontend runs on a different port.  We read allowed origins from an
+# env var so you never have to hard-code a URL.
+#
+_raw_origins = os.environ.get('ALLOWED_ORIGINS', '*')
+_allowed_origins = (
+    [o.strip() for o in _raw_origins.split(',') if o.strip()]
+    if _raw_origins != '*'
+    else '*'
+)
+
 CORS(app,
      supports_credentials=False,
-     origins='*',
+     origins=_allowed_origins,
      allow_headers=['Content-Type', 'X-User-ID', 'X-User-Role'],
      expose_headers=['Content-Type'])
-
-FAST2SMS_API_KEY = 'YOUR_FAST2SMS_API_KEY_HERE'
 
 # ── AUTH via custom headers ────────────────────────────────────────────
 # Frontend stores user_id in localStorage and sends as X-User-ID header.
