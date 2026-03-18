@@ -5,8 +5,8 @@ import sqlite3
 import random
 import string
 import requests
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'proshop-secret-2024'
@@ -570,7 +570,10 @@ def get_order(oid):
         return jsonify({'error': 'Order not found'}), 404
     return jsonify(dict(row))
 
+# ── STARTUP ────────────────────────────────────────────────────────────
+# Called at module level so Gunicorn triggers DB init on worker startup.
+init_db()
+seed_sample_data()
+
 if __name__ == '__main__':
-    init_db()
-    seed_sample_data()
     app.run(debug=True, port=5000)
