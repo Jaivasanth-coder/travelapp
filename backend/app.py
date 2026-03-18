@@ -297,7 +297,8 @@ def admin_get_orders():
     c = conn.cursor()
     c.execute('''SELECT o.*, u.phone as user_phone FROM orders o
                  LEFT JOIN users u ON o.user_id = u.id
-                 WHERE o.payment_status = 'paid' ORDER BY o.created_at DESC''')
+                 WHERE o.payment_status IN ('paid','claimed')
+                 ORDER BY o.created_at DESC''')
     orders = []
     for row in c.fetchall():
         order = dict(row)
@@ -307,6 +308,38 @@ def admin_get_orders():
         orders.append(order)
     conn.close()
     return jsonify(orders)
+
+
+@app.route('/api/admin/orders/<int:oid>/verify-payment', methods=['POST'])
+def admin_verify_payment(oid):
+    if not is_admin():
+        return jsonify({'error': 'Forbidden'}), 403
+    d = request.json or {}
+    action = d.get('action', '').strip()  # 'confirm' or 'reject'
+    if action not in ('confirm', 'reject'):
+        return jsonify({'error': 'action must be confirm or reject'}), 400
+    conn = sqlite3.connect('ecommerce.db')
+    c = conn.cursor()
+    c.execute('SELECT id, payment_status FROM orders WHERE id=?', (oid,))
+    order = c.fetchone()
+    if not order:
+        conn.close()
+        return jsonify({'error': 'Order not found'}), 404
+    if action == 'confirm':
+        c.execute('UPDATE orders SET status=?, payment_status=?, updated_at=? WHERE id=?',
+                  ('confirmed', 'paid', datetime.now(), oid))
+        msg = 'Payment confirmed'
+    else:
+        # Restore stock on rejection
+        c.execute('SELECT product_id, quantity FROM order_items WHERE order_id=?', (oid,))
+        for pid, qty in c.fetchall():
+            c.execute('UPDATE products SET stock=stock+? WHERE id=?', (qty, pid))
+        c.execute('UPDATE orders SET status=?, payment_status=?, updated_at=? WHERE id=?',
+                  ('cancelled', 'rejected', datetime.now(), oid))
+        msg = 'Payment rejected, order cancelled'
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'message': msg})
 
 @app.route('/api/admin/orders/<int:oid>/status', methods=['PUT'])
 def admin_update_order_status(oid):
@@ -557,8 +590,9 @@ def confirm_payment():
     if order[2] == 'paid':
         conn.close()
         return jsonify({'error': 'Order already paid'}), 400
+    # Status = 'pending_confirmation': customer claimed payment, admin must verify UPI ref
     c.execute('UPDATE orders SET status=?,payment_status=?,upi_ref=?,updated_at=? WHERE id=?',
-              ('confirmed', 'paid', upi_ref, datetime.now(), oid))
+              ('pending_confirmation', 'claimed', upi_ref, datetime.now(), oid))
     c.execute('SELECT product_id,quantity FROM order_items WHERE order_id=?', (oid,))
     for pid, qty in c.fetchall():
         c.execute('UPDATE products SET stock=stock-? WHERE id=?', (qty, pid))
@@ -575,7 +609,7 @@ def get_orders():
     conn = sqlite3.connect('ecommerce.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute("SELECT * FROM orders WHERE user_id=? AND payment_status='paid' ORDER BY created_at DESC", (uid,))
+    c.execute("SELECT * FROM orders WHERE user_id=? AND payment_status IN ('paid','claimed') ORDER BY created_at DESC", (uid,))
     orders = []
     for row in c.fetchall():
         order = dict(row)
@@ -599,6 +633,19 @@ def get_order(oid):
     if not row:
         return jsonify({'error': 'Order not found'}), 404
     return jsonify(dict(row))
+
+
+@app.errorhandler(404)
+def not_found(e):
+    # Return JSON instead of HTML for API routes; serve index.html for others
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Not found', 'path': request.path}), 404
+    frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
+    return send_from_directory(frontend_dir, 'index.html')
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({'error': 'Method not allowed'}), 405
 
 # ── STARTUP ────────────────────────────────────────────────────────────
 # Called at module level so Gunicorn triggers DB init on worker startup.
