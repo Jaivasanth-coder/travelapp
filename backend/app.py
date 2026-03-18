@@ -6,6 +6,7 @@ import random
 import string
 import requests
 from datetime import datetime, timedelta
+import os
 
 app = Flask(__name__)
 app.secret_key = 'proshop-secret-2024'
