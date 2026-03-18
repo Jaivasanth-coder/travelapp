@@ -1,47 +1,23 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import random
 import string
 import requests
-import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
+app.secret_key = 'proshop-secret-2024'
 
-# ── CONFIG: all secrets from environment variables ─────────────────────
-# Set these in Render Dashboard → Your Service → Environment tab.
-# For local dev, export them in your shell or use a .env file.
-#
-#   PROSHOP_SECRET_KEY   → any long random string
-#   FAST2SMS_API_KEY     → your Fast2SMS API key
-#   ALLOWED_ORIGINS      → comma-separated list of allowed frontend URLs
-#                          e.g. https://your-app.onrender.com,https://yourdomain.com
-#                          leave unset (or set to *) during development
-#
-app.secret_key = os.environ.get('PROSHOP_SECRET_KEY', 'change-me-in-production')
-
-FAST2SMS_API_KEY = os.environ.get('FAST2SMS_API_KEY', '')
-
-# ── CORS ───────────────────────────────────────────────────────────────
-# On Render both the Flask API and the static index.html are served from
-# the same origin, so CORS is only needed during local development where
-# the frontend runs on a different port.  We read allowed origins from an
-# env var so you never have to hard-code a URL.
-#
-_raw_origins = os.environ.get('ALLOWED_ORIGINS', '*')
-_allowed_origins = (
-    [o.strip() for o in _raw_origins.split(',') if o.strip()]
-    if _raw_origins != '*'
-    else '*'
-)
-
+# ── CORS: wildcard origins, no credentials needed (using headers) ─────
 CORS(app,
      supports_credentials=False,
-     origins=_allowed_origins,
+     origins='*',
      allow_headers=['Content-Type', 'X-User-ID', 'X-User-Role'],
      expose_headers=['Content-Type'])
+
+FAST2SMS_API_KEY = 'YOUR_FAST2SMS_API_KEY_HERE'
 
 # ── AUTH via custom headers ────────────────────────────────────────────
 # Frontend stores user_id in localStorage and sends as X-User-ID header.
@@ -148,6 +124,13 @@ def seed_sample_data():
             c.execute('INSERT INTO products (name,description,price,image_url,stock,max_qty,delivery_fee,created_at) VALUES (?,?,?,?,?,?,?,?)', (*r, datetime.now()))
     conn.commit()
     conn.close()
+
+# ── FRONTEND ───────────────────────────────────────────────────────────
+# Serves frontend/index.html at the root URL on Render.
+@app.route('/')
+def serve_index():
+    frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend')
+    return send_from_directory(frontend_dir, 'index.html')
 
 # ── HEALTH ─────────────────────────────────────────────────────────────
 @app.route('/api/health')
@@ -499,47 +482,15 @@ def create_order():
     delivery_fee = float(d.get('delivery_fee', 0))
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-
-    # ── BUG FIX: Frontend manages cart in JS memory only; it never writes
-    # to the DB cart table.  Accept items[] from the request body so the
-    # backend doesn't query an always-empty DB cart. Falls back to DB cart
-    # for any server-side flow that does write to it. ────────────────────
-    frontend_items = d.get('items', [])   # [{id, qty}, ...]
-    if frontend_items:
-        items = []
-        for entry in frontend_items:
-            pid = int(entry.get('id') or entry.get('product_id') or 0)
-            qty = int(entry.get('qty') or entry.get('quantity') or 1)
-            if not pid or qty < 1:
-                continue
-            c.execute('SELECT price, stock, max_qty FROM products WHERE id=?', (pid,))
-            row = c.fetchone()
-            if not row:
-                conn.close()
-                return jsonify({'error': f'Product {pid} not found'}), 400
-            price, stock, max_qty = row
-            if qty > (max_qty or 10):
-                conn.close()
-                return jsonify({'error': f'Max {max_qty} per order for product {pid}'}), 400
-            if stock < qty:
-                conn.close()
-                return jsonify({'error': f'Insufficient stock for product {pid}'}), 400
-            items.append((pid, qty, price, stock))
-        if not items:
+    c.execute('SELECT c.product_id,c.quantity,p.price,p.stock FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?', (uid,))
+    items = c.fetchall()
+    if not items:
+        conn.close()
+        return jsonify({'error': 'Cart is empty'}), 400
+    for pid, qty, price, stock in items:
+        if stock < qty:
             conn.close()
-            return jsonify({'error': 'No valid items in order'}), 400
-    else:
-        # Fallback: DB-managed cart
-        c.execute('SELECT c.product_id,c.quantity,p.price,p.stock FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?', (uid,))
-        items = c.fetchall()
-        if not items:
-            conn.close()
-            return jsonify({'error': 'Cart is empty'}), 400
-        for pid, qty, price, stock in items:
-            if stock < qty:
-                conn.close()
-                return jsonify({'error': 'Insufficient stock'}), 400
-
+            return jsonify({'error': 'Insufficient stock'}), 400
     subtotal = sum(qty * price for _, qty, price, _ in items)
     total = subtotal + delivery_fee
     c.execute('SELECT phone FROM users WHERE id=?', (uid,))
