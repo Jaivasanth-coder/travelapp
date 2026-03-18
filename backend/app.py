@@ -483,15 +483,45 @@ def create_order():
     delivery_fee = float(d.get('delivery_fee', 0))
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
-    c.execute('SELECT c.product_id,c.quantity,p.price,p.stock FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?', (uid,))
-    items = c.fetchall()
-    if not items:
-        conn.close()
-        return jsonify({'error': 'Cart is empty'}), 400
-    for pid, qty, price, stock in items:
-        if stock < qty:
+
+    # Frontend sends cart items in the request body (JS manages cart in memory,
+    # never writes to DB cart table). Fall back to DB cart if items not in body.
+    frontend_items = d.get('items', [])
+    if frontend_items:
+        items = []
+        for entry in frontend_items:
+            pid = int(entry.get('id') or entry.get('product_id') or 0)
+            qty = int(entry.get('qty') or entry.get('quantity') or 1)
+            if not pid or qty < 1:
+                continue
+            c.execute('SELECT price, stock, max_qty FROM products WHERE id=?', (pid,))
+            row = c.fetchone()
+            if not row:
+                conn.close()
+                return jsonify({'error': f'Product {pid} not found'}), 400
+            price, stock, max_qty = row
+            if qty > (max_qty or 10):
+                conn.close()
+                return jsonify({'error': f'Max {max_qty} per order for product {pid}'}), 400
+            if stock < qty:
+                conn.close()
+                return jsonify({'error': f'Insufficient stock for product {pid}'}), 400
+            items.append((pid, qty, price, stock))
+        if not items:
             conn.close()
-            return jsonify({'error': 'Insufficient stock'}), 400
+            return jsonify({'error': 'No valid items in order'}), 400
+    else:
+        # Fallback: DB-managed cart
+        c.execute('SELECT c.product_id,c.quantity,p.price,p.stock FROM cart c JOIN products p ON c.product_id=p.id WHERE c.user_id=?', (uid,))
+        items = c.fetchall()
+        if not items:
+            conn.close()
+            return jsonify({'error': 'Cart is empty'}), 400
+        for pid, qty, price, stock in items:
+            if stock < qty:
+                conn.close()
+                return jsonify({'error': 'Insufficient stock'}), 400
+
     subtotal = sum(qty * price for _, qty, price, _ in items)
     total = subtotal + delivery_fee
     c.execute('SELECT phone FROM users WHERE id=?', (uid,))
