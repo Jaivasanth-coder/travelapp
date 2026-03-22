@@ -2,23 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Mobile: prevents font-size inflation on orientation change, disables tap highlight -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ProShop">
-    <meta name="theme-color" content="#1a1a2e">
-    <meta name="description" content="ProShop – Fresh food & groceries, delivered">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProShop</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-
-    <!-- PWA Icons (Apple) -->
-    <link rel="apple-touch-icon" href="/icon-192.png">
-
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -168,6 +153,7 @@ header{background:var(--dark);padding:0 2rem;display:flex;justify-content:space-
 .status-on_the_way{background:#e8f5e9;color:#2e7d32}
 .status-delivered{background:#e8f5e9;color:#1b5e20}
 .status-awaiting_payment{background:#fce4ec;color:#880e4f}
+.status-pending_confirmation{background:#fff3e0;color:#e65100}
 .status-cancelled{background:#ffebee;color:#b71c1c}
 .order-items-list{font-size:.88rem;color:#666;margin:.5rem 0}
 .track-steps{display:flex;justify-content:space-between;margin-top:1.2rem;position:relative}
@@ -221,103 +207,7 @@ header{background:var(--dark);padding:0 2rem;display:flex;justify-content:space-
 .filter-btn.active{border-color:var(--primary);color:var(--primary);background:#fff8f4}
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:.8rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:700;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-
-/* ── GLOBAL MOBILE FIXES ── */
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-input, select, textarea, button { font-size: 16px !important; /* prevents iOS zoom on focus */ }
-* { -webkit-overflow-scrolling: touch; }
-
-/* ── SMALL PHONES: up to 480px (Moto Edge Fusion Pro, small Androids) ── */
-@media(max-width:480px){
-  /* Layout */
-  .container{padding:1rem .75rem}
-  header{padding:0 1rem;height:56px}
-  .logo{font-size:1.35rem}
-  .hbtn{padding:.35rem .7rem;font-size:.75rem}
-  .user-info{display:none}
-
-  /* Shop */
-  .shop-layout{flex-direction:column;gap:1rem}
-  .cat-sidebar{width:100%;position:static;border-radius:8px}
-  .cat-title{font-size:.78rem;padding:.7rem 1rem}
-  .cat-item{padding:.65rem 1rem;font-size:.88rem}
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem}
-  .product-image{height:130px}
-  .product-info{padding:.7rem}
-  .product-name{font-size:.88rem}
-  .product-price{font-size:1rem}
-  .section-title{font-size:1.3rem}
-
-  /* Cart sidebar */
-  .cart-sidebar{width:100%;right:-100%}
-
-  /* Login */
-  .login-box{width:95vw;padding:1.2rem}
-  .login-logo{font-size:1.8rem}
-  .otp-box{width:52px;height:52px;font-size:1.4rem}
-
-  /* Checkout */
-  .checkout-card{padding:1.2rem}
-  .pincode-row{flex-direction:column;gap:.5rem}
-  .pincode-row input{width:100%}
-
-  /* Payment */
-  .payment-card{padding:1.2rem}
-  .payment-amount{font-size:2.2rem}
-  .qr-wrapper{padding:10px}
-  #qrcode canvas,#qrcode img{width:170px !important;height:170px !important}
-
-  /* Orders tracker */
-  .track-steps::before{left:5%;right:5%}
-  .track-dot{width:30px;height:30px;font-size:.85rem}
-  .track-label{font-size:.6rem}
-
-  /* Admin */
-  .admin-layout{flex-direction:column}
-  .admin-nav{width:100%;position:static;display:flex;flex-wrap:wrap;padding:.5rem;gap:.3rem}
-  .admin-nav-item{padding:.5rem .8rem;font-size:.8rem;border-left:none;border-radius:6px}
-  .admin-nav-title{display:none}
-  .admin-content{padding:1rem .75rem}
-  .form-grid{grid-template-columns:1fr}
-  .data-table th,.data-table td{padding:.5rem .6rem;font-size:.78rem}
-  .stat-cards{grid-template-columns:repeat(2,1fr)}
-
-  /* Confirm card */
-  .confirm-card{padding:2rem 1.2rem}
-}
-
-/* ── MEDIUM PHONES: 481px–700px ── */
-@media(min-width:481px) and (max-width:700px){
-  .shop-layout,.admin-layout{flex-direction:column}
-  .cat-sidebar,.admin-nav{width:100%;position:static}
-  .form-grid{grid-template-columns:1fr}
-  .cart-sidebar{width:100%}
-  .login-box{width:95vw;padding:1.5rem}
-  .track-label{font-size:.65rem}
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
-  .container{padding:1.2rem 1rem}
-  .admin-layout{flex-direction:column}
-  .admin-nav{width:100%;position:static;display:flex;flex-wrap:wrap;padding:.5rem;gap:.3rem}
-  .admin-nav-item{padding:.5rem .9rem;font-size:.82rem;border-left:none;border-radius:6px}
-  .admin-nav-title{display:none}
-  .admin-content{padding:1.2rem 1rem}
-}
-
-/* ── TABLET: 701px–1024px ── */
-@media(min-width:701px) and (max-width:1024px){
-  .cat-sidebar{width:180px}
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-  .login-box{width:480px}
-}
-
-/* ── SAFE AREA for notched phones (iPhone X+, some Androids) ── */
-@supports(padding: max(0px)){
-  header { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
-  .container { padding-left: max(.75rem, env(safe-area-inset-left)); padding-right: max(.75rem, env(safe-area-inset-right)); }
-  .cart-sidebar { padding-bottom: env(safe-area-inset-bottom); }
-}
-
+@media(max-width:700px){.shop-layout,.admin-layout{flex-direction:column}.cat-sidebar,.admin-nav{width:100%;position:static}.form-grid{grid-template-columns:1fr}.cart-sidebar{width:100%}.login-box{width:95vw;padding:1.5rem}.track-label{font-size:.65rem}}
 </style>
 
 <header>
@@ -1132,20 +1022,28 @@ async function confirmPayment() {
     
     const d2 = await r2.json();
     if (d2.success) {
-      // Clear state FIRST
-      cart = {}; 
+      // Snapshot pendingOrder BEFORE clearing — fixes "Cannot read properties of null" crash
+      const confirmedOrder = {
+        total_amount: d1.total_amount,
+        apartment:    pendingOrder.apartment,
+        address:      pendingOrder.address,
+        pincode:      pendingOrder.pincode
+      };
+
+      // Clear state
+      cart = {};
       pendingOrder = null;
-      
-      // Re-enable button BEFORE navigation
+
+      // Re-enable button
       if (btn) { btn.disabled = false; btn.textContent = originalText; }
-      
-      // Update UI
+
+      // Update confirmation page using snapshot
       document.getElementById('confirmOrderId').textContent = 'ORD-' + d1.order_id;
-      document.getElementById('confirmMsg').textContent = `₹${Number(pendingOrder.total_amount).toFixed(2)} via GPay · Delivering to ${pendingOrder.apartment || pendingOrder.address}, ${pendingOrder.pincode}`;
+      document.getElementById('confirmMsg').textContent = `₹${Number(confirmedOrder.total_amount).toFixed(2)} via GPay · Delivering to ${confirmedOrder.apartment || confirmedOrder.address}, ${confirmedOrder.pincode}`;
       const refText = upiRef === 'MANUAL_VERIFY_PENDING' ? '📋 UPI Ref: Pending (admin will verify)' : '📋 UPI Ref: ' + upiRef;
       document.getElementById('confirmRef').textContent = refText;
-      
-      updateCartUI(); 
+
+      updateCartUI();
       renderProducts(activeCat);
       showPage('confirmation');
     } else {
@@ -1162,14 +1060,16 @@ async function confirmPayment() {
 function cancelOrder() { pendingOrder = null; showPage('checkout'); }
 
 // ── MY ORDERS (customer tracking) ─────────────────────────────────────
-const STATUS_STEPS = ['confirmed','preparing','on_the_way','delivered'];
+// 5-step tracker: pending_confirmation is step 0 (payment claimed, awaiting admin verify)
+const STATUS_STEPS = ['pending_confirmation', 'confirmed', 'preparing', 'on_the_way', 'delivered'];
 const STATUS_LABELS = {
-  confirmed:        { emoji: '✅', label: 'Order Confirmed' },
-  preparing:        { emoji: '👨‍🍳', label: 'Preparing' },
-  on_the_way:       { emoji: '🛵', label: 'On the Way' },
-  delivered:        { emoji: '🎉', label: 'Delivered' },
-  awaiting_payment: { emoji: '⏳', label: 'Awaiting Payment' },
-  cancelled:        { emoji: '❌', label: 'Cancelled' },
+  pending_confirmation: { emoji: '🕐', label: 'Payment Pending' },
+  confirmed:            { emoji: '✅', label: 'Order Confirmed' },
+  preparing:            { emoji: '👨‍🍳', label: 'Preparing' },
+  on_the_way:           { emoji: '🛵', label: 'On the Way' },
+  delivered:            { emoji: '🎉', label: 'Delivered' },
+  awaiting_payment:     { emoji: '⏳', label: 'Awaiting Payment' },
+  cancelled:            { emoji: '❌', label: 'Cancelled' },
 };
 
 function showMyOrders() { showPage('myOrders'); }
@@ -1194,7 +1094,7 @@ function renderOrderCard(o) {
   const st = o.status || 'confirmed';
   const statusInfo = STATUS_LABELS[st] || { emoji: '📦', label: st };
   const statusClass = `status-${st}`;
-  const itemsText = (o.items || []).map(i => `${i.name} × ${i.qty}`).join(', ');
+  const itemsText = (o.items || []).map(i => `${i.name} × ${i.quantity || i.qty || 1}`).join(', ');
   const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
   const isCancelled = st === 'cancelled';
   const isDelivered = st === 'delivered';
@@ -1473,75 +1373,8 @@ async function deleteProduct(pid) {
   } catch (e) { alert(e.message); }
 }
 
-// ── PWA: Service Worker registration ──────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('✅ ProShop SW registered'))
-      .catch(e => console.log('SW registration skipped:', e.message));
-  });
-}
-
-// ── PWA: Install banner ────────────────────────────────────────────────
-let deferredInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  // Show install banner after 3 seconds if not already installed
-  setTimeout(() => {
-    if (deferredInstallPrompt) showInstallBanner();
-  }, 3000);
-});
-
-function showInstallBanner() {
-  if (document.getElementById('pwa-banner')) return;
-  const banner = document.createElement('div');
-  banner.id = 'pwa-banner';
-  banner.style.cssText = `
-    position:fixed;bottom:0;left:0;right:0;
-    background:#1a1a2e;color:#fff;
-    padding:1rem 1.2rem;
-    display:flex;align-items:center;justify-content:space-between;gap:.8rem;
-    z-index:10000;box-shadow:0 -4px 20px rgba(0,0,0,.3);
-    font-family:'Lato',sans-serif;font-size:.9rem;
-  `;
-  banner.innerHTML = `
-    <div style="display:flex;align-items:center;gap:.7rem">
-      <span style="font-size:1.6rem">🛍️</span>
-      <div>
-        <div style="font-weight:700;color:#ff8c42">Install ProShop App</div>
-        <div style="font-size:.8rem;color:#aaa">Add to home screen for quick ordering</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:.5rem;flex-shrink:0">
-      <button onclick="installPWA()" style="background:#e8631a;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-weight:700;cursor:pointer;font-size:.85rem">Install</button>
-      <button onclick="dismissInstallBanner()" style="background:transparent;color:#aaa;border:1px solid #444;border-radius:8px;padding:.5rem .8rem;cursor:pointer;font-size:.85rem">✕</button>
-    </div>
-  `;
-  document.body.appendChild(banner);
-}
-
-function installPWA() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then(choice => {
-    if (choice.outcome === 'accepted') showToast('✅ ProShop installed!');
-    deferredInstallPrompt = null;
-    dismissInstallBanner();
-  });
-}
-
-function dismissInstallBanner() {
-  const b = document.getElementById('pwa-banner');
-  if (b) b.remove();
-}
-
-window.addEventListener('appinstalled', () => {
-  showToast('🎉 ProShop added to home screen!');
-  deferredInstallPrompt = null;
-  dismissInstallBanner();
-});
-
+// ── INIT ───────────────────────────────────────────────────────────────
+// Restore session from localStorage
 currentUser = loadCurrentUser();
 if (currentUser) {
   updateUserUI();
