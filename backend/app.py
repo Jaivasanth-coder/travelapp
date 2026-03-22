@@ -32,18 +32,23 @@ FAST2SMS_API_KEY = os.environ.get('FAST2SMS_API_KEY', 'YOUR_FAST2SMS_API_KEY_HER
 
 # ── DB CONNECTION ──────────────────────────────────────────────────────────
 def get_db():
-    """
-    Returns a new psycopg2 connection.
-    - Locally  : reads DATABASE_URL from .env
-    - On Render: reads DATABASE_URL from Render environment variables
-    Render sometimes provides 'postgres://' (legacy). psycopg2 needs 'postgresql://'.
-    """
     db_url = os.environ.get('DATABASE_URL', '')
     if not db_url:
         raise RuntimeError("DATABASE_URL environment variable is not set.")
     if db_url.startswith('postgres://'):
         db_url = db_url.replace('postgres://', 'postgresql://', 1)
-    return psycopg2.connect(db_url)
+    # Strip pgbouncer=true param — psycopg2 doesn't recognise it
+    # but keep sslmode if present
+    import urllib.parse as _up
+    from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+    parsed = urlparse(db_url)
+    params = parse_qs(parsed.query)
+    params.pop('pgbouncer', None)          # remove pgbouncer=true
+    if 'sslmode' not in params:
+        params['sslmode'] = ['require']    # always require SSL
+    new_query = urlencode({k: v[0] for k, v in params.items()})
+    clean_url = urlunparse(parsed._replace(query=new_query))
+    return psycopg2.connect(clean_url, connect_timeout=10)
 
 # ── AUTH HELPERS ───────────────────────────────────────────────────────────
 def get_user_id():
