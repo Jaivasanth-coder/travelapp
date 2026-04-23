@@ -1,1388 +1,1168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProShop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sai Anjenya Yatra — Domestic & International Tours</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --deep: #0a1628;
+    --deep2: #112240;
+    --teal: #1a7f7f;
+    --teal-light: #25b0a0;
+    --cream: #faf6ee;
+    --text: #2c3e50;
+    --muted: #7f8c9a;
+    --white: #ffffff;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(10,22,40,0.12);
+    --shadow-lg: 0 20px 60px rgba(10,22,40,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── NAVBAR ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,22,40,0.95);
+    backdrop-filter: blur(12px);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 72px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { color: var(--white); }
+  .logo-text strong { font-family: 'Playfair Display', serif; font-size: 18px; display: block; line-height: 1.1; }
+  .logo-text span { font-size: 11px; color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  .nav-links { display: flex; align-items: center; gap: 8px; }
+  .nav-links a {
+    color: rgba(255,255,255,0.8); text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    padding: 8px 16px; border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--gold); background: rgba(201,168,76,0.1); }
+
+  .nav-auth { display: flex; gap: 8px; align-items: center; }
+  .btn-nav-login {
+    color: var(--gold); border: 1px solid var(--gold);
+    background: transparent; padding: 8px 20px;
+    border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-nav-login:hover { background: var(--gold); color: var(--deep); }
+  .btn-nav-signup {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--deep); border: none;
+    padding: 8px 20px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: all 0.2s;
+  }
+  .btn-nav-signup:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--deep) 0%, var(--deep2) 40%, #0d3d3d 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 100px 5% 60px;
+    position: relative; overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1600') center/cover;
+    opacity: 0.12;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold); padding: 8px 20px; border-radius: 50px;
+    font-size: 13px; font-weight: 500; letter-spacing: 1px;
+    margin-bottom: 32px; animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: var(--white); line-height: 1.1;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+
+  .hero h1 em { color: var(--gold); font-style: italic; }
+
+  .hero p {
+    font-size: 18px; color: rgba(255,255,255,0.7);
+    max-width: 600px; line-height: 1.7; margin-bottom: 48px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .hero-search {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    width: 100%; max-width: 700px;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+
+  .hero-search input {
+    flex: 1; min-width: 280px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); padding: 16px 24px; border-radius: 12px;
+    font-size: 15px; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: all 0.2s;
+  }
+  .hero-search input::placeholder { color: rgba(255,255,255,0.5); }
+  .hero-search input:focus { border-color: var(--gold); background: rgba(255,255,255,0.15); }
+
+  .btn-search {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--deep); border: none; padding: 16px 32px;
+    border-radius: 12px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-search:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.4); }
+
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 60px;
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat strong { display: block; font-size: 2rem; color: var(--gold); font-family: 'Playfair Display', serif; }
+  .hero-stat span { font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
+
+  /* ── SECTIONS ── */
+  .section { padding: 80px 5%; }
+  .section-alt { background: var(--white); }
+
+  .section-header { text-align: center; margin-bottom: 56px; }
+  .section-label {
+    display: inline-block;
+    color: var(--teal); font-size: 12px; font-weight: 600;
+    letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--deep); line-height: 1.2; margin-bottom: 16px;
+  }
+  .section-header p { color: var(--muted); max-width: 560px; margin: 0 auto; line-height: 1.7; }
+
+  /* ── CATEGORY TABS ── */
+  .tabs {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 10px 28px; border-radius: 50px; border: 2px solid transparent;
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    background: var(--cream);  color: var(--muted);
+  }
+  .tab-btn.active {
+    background: var(--deep); color: var(--gold);
+    border-color: var(--deep);
+  }
+  .tab-btn:hover:not(.active) { border-color: var(--teal); color: var(--teal); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+
+  .card {
+    background: var(--white); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow);
+    transition: all 0.3s; cursor: pointer;
+  }
+  .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+  .card-img {
+    position: relative; height: 220px; overflow: hidden;
+  }
+  .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .card:hover .card-img img { transform: scale(1.05); }
+
+  .card-badge {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--gold); color: var(--deep);
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 50px; text-transform: uppercase;
+  }
+  .card-badge.intl { background: var(--teal); color: var(--white); }
+
+  .card-body { padding: 24px; }
+  .card-body h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 8px; color: var(--deep); }
+  .card-meta { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+  .card-meta span { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .card-meta span b { color: var(--text); }
+
+  .card-rating { display: flex; align-items: center; gap: 4px; }
+  .stars { color: var(--gold); font-size: 14px; }
+  .rating-num { font-size: 13px; color: var(--muted); }
+
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px; border-top: 1px solid #f0f0f0;
+  }
+  .price { font-family: 'Playfair Display', serif; }
+  .price small { font-size: 12px; color: var(--muted); font-family: 'DM Sans', sans-serif; display: block; }
+  .price strong { font-size: 1.5rem; color: var(--teal); }
+
+  .btn-book {
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: var(--white); border: none; padding: 10px 20px;
+    border-radius: 10px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-book:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── WHY US ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 32px;
+  }
+  .feature-card {
+    text-align: center; padding: 40px 32px;
+    background: var(--white); border-radius: var(--radius);
+    box-shadow: var(--shadow); transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+  }
+  .feature-card:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .feature-icon {
+    width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    background: linear-gradient(135deg, var(--deep), var(--deep2));
+  }
+  .feature-card h3 { font-size: 1.1rem; margin-bottom: 12px; color: var(--deep); }
+  .feature-card p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px;
+  }
+  .testimonial {
+    background: var(--deep); color: var(--white);
+    padding: 36px; border-radius: var(--radius); position: relative;
+  }
+  .testimonial::before {
+    content: '"'; font-family: 'Playfair Display', serif;
+    font-size: 80px; color: var(--gold); opacity: 0.3;
+    position: absolute; top: 10px; left: 24px; line-height: 1;
+  }
+  .testimonial p { line-height: 1.8; color: rgba(255,255,255,0.85); margin-bottom: 20px; font-style: italic; }
+  .testimonial-author { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--white);
+  }
+  .author-info strong { display: block; font-size: 14px; }
+  .author-info span { font-size: 12px; color: var(--gold); }
+
+  /* ── CONTACT ── */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+  .contact-info h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 20px; color: var(--deep); }
+  .contact-info p { color: var(--muted); line-height: 1.8; margin-bottom: 32px; }
+  .contact-detail { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+  .contact-detail-icon {
+    width: 44px; height: 44px; min-width: 44px;
+    background: linear-gradient(135deg, var(--deep), var(--deep2));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .contact-detail h4 { font-size: 14px; color: var(--deep); margin-bottom: 4px; }
+  .contact-detail p { color: var(--muted); font-size: 14px; margin: 0; }
+
+  .contact-form { background: var(--white); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow); }
+  .contact-form h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 24px; color: var(--deep); }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 12px 16px; border: 1.5px solid #e8ecf0;
+    border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; background: var(--cream);
+    color: var(--text);
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--teal); background: var(--white); }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+
+  .btn-primary {
+    width: 100%; background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: var(--white); border: none; padding: 14px;
+    border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white); border-radius: 20px; padding: 40px;
+    width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    position: relative; animation: scaleIn 0.25s ease;
+  }
+  .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 8px; color: var(--deep); }
+  .modal p.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .modal-close {
+    position: absolute; top: 20px; right: 20px;
+    background: #f0f0f0; border: none; width: 32px; height: 32px;
+    border-radius: 50%; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: #e0e0e0; }
+  .modal-switch { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+  .modal-switch a { color: var(--teal); cursor: pointer; font-weight: 500; }
+  .modal-switch a:hover { text-decoration: underline; }
+
+  /* Package Detail Modal */
+  .pkg-modal { max-width: 720px; }
+  .pkg-modal-img { width: 100%; height: 260px; object-fit: cover; border-radius: 12px; margin-bottom: 24px; }
+  .pkg-modal h2 { font-size: 2rem; }
+  .pkg-tags { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .pkg-tag {
+    padding: 6px 14px; border-radius: 50px; font-size: 12px; font-weight: 600;
+    background: #f0f9f9; color: var(--teal); border: 1px solid rgba(26,127,127,0.2);
+  }
+  .pkg-section { margin: 24px 0; }
+  .pkg-section h4 { font-size: 14px; font-weight: 600; color: var(--deep); margin-bottom: 10px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .pkg-section p { color: var(--muted); font-size: 14px; line-height: 1.8; }
+  .itinerary-days { list-style: none; }
+  .itinerary-days li {
+    padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+    font-size: 14px; color: var(--text); padding-left: 20px; position: relative;
+  }
+  .itinerary-days li::before {
+    content: '→'; position: absolute; left: 0; color: var(--teal); font-weight: 700;
+  }
+  .booking-form { margin-top: 28px; padding-top: 28px; border-top: 2px solid #f0f0f0; }
+  .booking-form h4 { font-size: 1rem; font-weight: 600; margin-bottom: 20px; color: var(--deep); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ── USER MENU ── */
+  .user-menu { position: relative; }
+  .user-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); padding: 8px 16px; border-radius: 10px; cursor: pointer;
+    font-size: 14px; transition: all 0.2s;
+  }
+  .user-btn:hover { background: rgba(255,255,255,0.15); }
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--white); border-radius: 12px; box-shadow: var(--shadow-lg);
+    min-width: 200px; overflow: hidden; display: none;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown a {
+    display: block; padding: 12px 20px; color: var(--text);
+    text-decoration: none; font-size: 14px; transition: background 0.2s;
+  }
+  .user-dropdown a:hover { background: var(--cream); }
+  .user-dropdown .logout { color: var(--danger); border-top: 1px solid #f0f0f0; }
+
+  /* ── MY BOOKINGS ── */
+  .booking-card {
+    background: var(--white); border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow); display: flex; gap: 20px; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .booking-card img { width: 100px; height: 80px; object-fit: cover; border-radius: 10px; }
+  .booking-info { flex: 1; }
+  .booking-info h4 { font-size: 1rem; font-weight: 600; color: var(--deep); margin-bottom: 6px; }
+  .booking-info p { font-size: 13px; color: var(--muted); }
+  .status-badge {
+    padding: 4px 12px; border-radius: 50px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-top: 8px;
+  }
+  .status-pending { background: #fff3cd; color: #856404; }
+  .status-confirmed { background: #d1e7dd; color: #0f5132; }
+  .status-cancelled { background: #f8d7da; color: #721c24; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--deep); color: rgba(255,255,255,0.7);
+    padding: 60px 5% 30px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 14px; line-height: 1.8; margin: 16px 0; }
+  .footer-col h4 { color: var(--white); font-size: 15px; margin-bottom: 20px; }
+  .footer-col a { display: block; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; margin-bottom: 10px; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--gold); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; text-align: center; font-size: 13px; }
+  .footer-bottom span { color: var(--gold); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    background: var(--deep); color: var(--white);
+    padding: 16px 24px; border-radius: 12px; box-shadow: var(--shadow-lg);
+    font-size: 14px; display: flex; align-items: center; gap: 12px;
+    transform: translateY(100px); opacity: 0; transition: all 0.3s;
+    max-width: 360px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 4px solid var(--success); }
+  .toast.error { border-left: 4px solid var(--danger); }
+
+  /* ── LOADING ── */
+  .loader { text-align: center; padding: 60px; color: var(--muted); }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid #e8ecf0;
+    border-top-color: var(--teal); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+
+  /* ── PAGE VIEWS ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .hero-stats { gap: 24px; }
+    .nav-links { display: none; }
+  }
+</style>
 </head>
 <body>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#e8631a;--primary2:#ff8c42;--dark:#1a1a2e;--mid:#2e2e4a;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;--gpay:#1a73e8;--border:#e0e0e0;--text:#444;--bg:#f7f7f9}
-body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text)}
-header{background:var(--dark);padding:0 2rem;display:flex;justify-content:space-between;align-items:center;height:64px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.logo{font-family:'Nunito',sans-serif;font-size:1.7rem;font-weight:900;color:var(--primary2);letter-spacing:-.5px;cursor:pointer}
-.logo span{color:#fff}
-.header-right{display:flex;gap:.8rem;align-items:center}
-.user-info{color:#ccc;font-size:.9rem}.user-info strong{color:#fff}
-.hbtn{padding:.45rem 1rem;border:none;border-radius:20px;cursor:pointer;font-size:.82rem;font-weight:700;transition:all .2s}
-.hbtn-admin{background:var(--mid);color:var(--primary2);border:1px solid var(--primary);display:none}
-.hbtn-admin:hover{background:var(--primary);color:#fff}
-.hbtn-orders{background:var(--mid);color:#7ec8e3;border:1px solid #7ec8e3;display:none}
-.hbtn-orders:hover{background:#7ec8e3;color:#fff}
-.hbtn-logout{background:var(--danger);color:#fff;display:none}
-.cart-icon{position:relative;cursor:pointer;font-size:1.5rem;color:#fff;padding:.3rem}
-.cart-badge{position:absolute;top:-4px;right:-6px;background:var(--primary);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800}
-.container{max-width:1280px;margin:0 auto;padding:2rem}
-.page{display:none;animation:fadeIn .3s}.page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.btn{padding:.55rem 1.2rem;border:none;border-radius:7px;cursor:pointer;font-size:.9rem;font-weight:700;transition:all .2s}
-.btn:hover{opacity:.88;transform:translateY(-1px)}
-.btn-primary{background:var(--primary);color:#fff}.btn-success{background:var(--success);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
-.btn-gpay{background:var(--gpay);color:#fff}.btn-warning{background:var(--warning);color:#fff}.btn-sm{padding:.3rem .7rem;font-size:.8rem}
-.login-wrap{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--dark) 0%,#2c1a5e 100%)}
-.login-box{background:#fff;border-radius:16px;padding:2.5rem;width:440px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.login-logo{text-align:center;margin-bottom:1.8rem;font-family:'Nunito',sans-serif;font-size:2.2rem;font-weight:900;color:var(--primary)}
-.login-logo small{display:block;font-size:.9rem;color:#888;font-weight:400;margin-top:2px}
-.login-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:1.8rem}
-.login-tab{flex:1;padding:.8rem;border:none;background:transparent;font-size:.9rem;font-weight:700;cursor:pointer;color:#999;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
-.login-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
-.login-form{display:none}.login-form.active{display:block}
-.cust-subtabs{display:flex;gap:.5rem;margin-bottom:1.2rem}
-.cust-subtab{flex:1;padding:.55rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:.85rem;font-weight:700;cursor:pointer;color:#888;transition:all .2s;text-align:center}
-.cust-subtab.active{border-color:var(--primary);color:var(--primary);background:#fff8f4}
-.cust-subform{display:none}.cust-subform.active{display:block}
-.form-group{margin-bottom:1.1rem}
-.form-group label{display:block;font-weight:700;margin-bottom:.4rem;font-size:.88rem;color:var(--dark)}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:.72rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-size:1rem;transition:border-color .2s;font-family:'Lato',sans-serif}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(232,99,26,.1)}
-.form-group textarea{resize:vertical;min-height:70px}
-.phone-row{display:flex;gap:.5rem;align-items:flex-end}
-.phone-prefix{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:.72rem .8rem;font-weight:700;color:var(--dark);white-space:nowrap;font-size:.95rem}
-.otp-boxes{display:flex;gap:.7rem;justify-content:center;margin:1rem 0}
-.otp-box{width:60px;height:60px;border:2px solid var(--border);border-radius:10px;text-align:center;font-size:1.6rem;font-weight:800;font-family:'Nunito',sans-serif}
-.otp-box:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(232,99,26,.15)}
-.form-error{color:var(--danger);font-size:.85rem;margin-top:.3rem;display:none}.form-error.show{display:block}
-.form-success{color:var(--success);font-size:.85rem;background:#eafaf1;padding:.5rem .8rem;border-radius:6px;display:none;margin-top:.3rem}.form-success.show{display:block}
-.shop-layout{display:flex;gap:1.5rem;align-items:flex-start}
-.cat-sidebar{width:220px;flex-shrink:0;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden;position:sticky;top:80px}
-.cat-title{background:var(--dark);color:#fff;padding:1rem 1.2rem;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;letter-spacing:1px;text-transform:uppercase}
-.cat-item{display:flex;align-items:center;gap:.6rem;padding:.85rem 1.2rem;cursor:pointer;font-weight:600;font-size:.95rem;border-left:3px solid transparent;transition:all .15s;color:var(--text);border-bottom:1px solid #f0f0f0}
-.cat-item:hover{background:#fff5ef;color:var(--primary)}.cat-item.active{background:#fff5ef;color:var(--primary);border-left-color:var(--primary)}
-.cat-count{margin-left:auto;background:var(--bg);border-radius:20px;padding:1px 8px;font-size:.75rem;color:#999}
-.cat-item.active .cat-count{background:var(--primary);color:#fff}
-.products-area{flex:1;min-width:0}
-.section-title{font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:900;color:var(--dark);margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem}
-.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,var(--primary),transparent);margin-left:.5rem}
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.2rem}
-.product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:transform .25s,box-shadow .25s;position:relative}
-.product-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
-.product-image{width:100%;height:160px;object-fit:cover;background:var(--bg)}
-.product-info{padding:.9rem}
-.product-cat{font-size:.72rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem}
-.product-name{font-weight:700;color:var(--dark);font-size:.95rem;margin-bottom:.25rem;line-height:1.3}
-.product-meta{font-size:.78rem;color:#aaa;margin-bottom:.4rem}
-.product-price{font-size:1.15rem;color:var(--success);font-weight:800;margin-bottom:.8rem}
-.qty-control{display:flex;align-items:center;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}
-.qty-btn{background:var(--bg);border:none;width:34px;height:34px;cursor:pointer;font-size:1.1rem;font-weight:800;color:var(--primary);transition:background .15s}
-.qty-btn:hover{background:var(--primary);color:#fff}
-.qty-display{flex:1;text-align:center;font-weight:800;font-size:.95rem;min-width:32px}
-.add-first-btn{width:100%;padding:.55rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem;transition:background .2s}
-.add-first-btn:hover{background:#c8531a}
-.admin-card-actions{position:absolute;top:8px;right:8px;display:flex;gap:4px}
-.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.75rem;font-weight:700;margin-right:3px}
-.tag-free{background:#eafaf1;color:#155724}.tag-paid{background:#fff0e6;color:#a04000}
-.cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:998}.cart-overlay.show{display:block}
-.cart-sidebar{position:fixed;top:0;right:-380px;width:370px;height:100vh;background:#fff;z-index:999;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.15);transition:right .3s cubic-bezier(.4,0,.2,1)}
-.cart-sidebar.show{right:0}
-.cart-header{padding:1.2rem 1.5rem;background:var(--dark);color:#fff;display:flex;justify-content:space-between;align-items:center}
-.cart-header h3{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900}
-.cart-close{background:transparent;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
-.cart-items{flex:1;overflow-y:auto;padding:.8rem}
-.cart-empty{text-align:center;padding:3rem 1rem;color:#aaa}
-.cart-item{display:flex;gap:.8rem;padding:.8rem;border-bottom:1px solid var(--border);align-items:center}
-.cart-item-img{width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0}
-.cart-item-info{flex:1;min-width:0}
-.cart-item-name{font-weight:700;font-size:.88rem;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cart-item-price{color:var(--success);font-weight:700;font-size:.9rem}
-.cart-qty-row{display:flex;align-items:center;gap:.4rem;margin-top:.3rem}
-.cqty-btn{background:var(--bg);border:1px solid var(--border);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:800;color:var(--primary);display:flex;align-items:center;justify-content:center;transition:all .15s}
-.cqty-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
-.cqty-num{font-weight:800;font-size:.9rem;min-width:20px;text-align:center}
-.cart-item-remove{color:var(--danger);background:none;border:none;cursor:pointer;font-size:1.1rem;flex-shrink:0}
-.cart-footer{padding:1rem 1.2rem;border-top:2px solid var(--border);background:#fff}
-.cf-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.9rem}
-.cf-total{font-size:1.1rem;font-weight:800;color:var(--dark);border-top:1px solid var(--border);margin-top:.4rem;padding-top:.6rem;display:flex;justify-content:space-between}
-.cf-note{font-size:.75rem;color:#aaa;margin:.2rem 0 .5rem}
-.checkout-btn{width:100%;padding:.85rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:800;cursor:pointer;margin-top:.8rem;transition:background .2s;font-family:'Nunito',sans-serif}
-.checkout-btn:hover{background:#c8531a}
-.checkout-wrap{max-width:680px;margin:0 auto}
-.checkout-card{background:#fff;border-radius:12px;padding:1.8rem;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1.2rem}
-.checkout-card h3{font-family:'Nunito',sans-serif;font-weight:900;color:var(--dark);margin-bottom:1.2rem;font-size:1.1rem}
-.pincode-row{display:flex;gap:.8rem}.pincode-row input{flex:1}
-.pincode-msg{margin-top:.8rem;padding:.9rem 1rem;border-radius:8px;font-size:.9rem;display:none}.pincode-msg.show{display:block}
-.pincode-ok{background:#eafaf1;color:#155724;border:1px solid #c3e6cb}
-.pincode-err{background:#fdf0f0;color:#721c24;border:1px solid #f5c6cb}
-.apts-list{margin-top:.5rem;padding-left:1rem;font-size:.85rem;opacity:.85}.apts-list li{margin-bottom:.2rem}
-.sum-table{width:100%;border-collapse:collapse}
-.sum-table td{padding:.5rem 0;border-bottom:1px solid var(--border);font-size:.9rem}
-.sum-table td:last-child{text-align:right;font-weight:700}
-.sum-total td{font-size:1.1rem;font-weight:800;color:var(--dark);border-bottom:none;padding-top:.8rem}
-.sum-delivery td{color:var(--warning)}
-.payment-wrap{max-width:520px;margin:0 auto}
-.payment-card{background:#fff;border-radius:16px;padding:2rem;box-shadow:0 4px 20px rgba(0,0,0,.1);text-align:center;margin-bottom:1.2rem}
-.payment-card h2{font-family:'Nunito',sans-serif;font-weight:900;color:var(--dark);margin-bottom:.4rem;font-size:1.4rem}
-.payment-amount{font-family:'Nunito',sans-serif;font-size:2.8rem;font-weight:900;color:var(--gpay);margin:1rem 0;line-height:1.2}
-.payment-amount small{font-size:1rem;color:#888;display:block;margin-top:.3rem}
-.qr-wrapper{display:inline-block;padding:16px;border:3px solid #e8f0fe;border-radius:16px;background:#fff;margin:1rem auto;box-shadow:0 2px 12px rgba(26,115,232,.1)}
-#qrcode canvas,#qrcode img{display:block}
-.gpay-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--gpay);color:#fff;padding:.5rem 1.2rem;border-radius:20px;font-weight:700;font-size:.88rem;margin:.5rem 0}
-.upi-id-box{background:#f0f7ff;border:1px solid #b3d4f5;border-radius:8px;padding:.7rem 1rem;font-size:.88rem;color:#1a5fa8;margin:.5rem 0;font-family:monospace;word-break:break-all}
-.payment-steps{text-align:left;background:#f8f9fa;border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;font-size:.88rem}
-.payment-steps li{margin-bottom:.5rem;padding-left:.3rem}.payment-steps li::marker{color:var(--gpay)}
-.ref-input-group{display:flex;gap:.6rem;margin-top:.5rem}
-.ref-input-group input{flex:1;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-size:1rem;font-family:'Lato',sans-serif}
-.ref-input-group input:focus{outline:none;border-color:var(--gpay);box-shadow:0 0 0 3px rgba(26,115,232,.1)}
-.confirm-card{text-align:center;background:#fff;border-radius:16px;padding:3rem 2rem;max-width:500px;margin:2rem auto;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-.confirm-icon{font-size:4rem;margin-bottom:1rem}
-.confirm-ref{background:#f0f7ff;border-radius:8px;padding:.8rem 1.2rem;font-size:.9rem;margin:1rem 0;color:#1a5fa8;font-family:monospace}
 
-/* ── ORDER TRACKING ── */
-.orders-wrap{max-width:800px;margin:0 auto}
-.order-card{background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:1.2rem}
-.order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
-.order-id{font-family:'Nunito',sans-serif;font-weight:900;color:var(--dark);font-size:1.1rem}
-.order-date{font-size:.82rem;color:#aaa;margin-top:.2rem}
-.order-amount{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--success)}
-.order-status-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1rem;border-radius:20px;font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
-.status-confirmed{background:#fff8e1;color:#e65100}
-.status-preparing{background:#e3f2fd;color:#1565c0}
-.status-on_the_way{background:#e8f5e9;color:#2e7d32}
-.status-delivered{background:#e8f5e9;color:#1b5e20}
-.status-awaiting_payment{background:#fce4ec;color:#880e4f}
-.status-pending_confirmation{background:#fff3e0;color:#e65100}
-.status-cancelled{background:#ffebee;color:#b71c1c}
-.order-items-list{font-size:.88rem;color:#666;margin:.5rem 0}
-.track-steps{display:flex;justify-content:space-between;margin-top:1.2rem;position:relative}
-.track-steps::before{content:'';position:absolute;top:18px;left:10%;right:10%;height:3px;background:var(--border);z-index:0}
-.track-step{flex:1;text-align:center;position:relative;z-index:1}
-.track-dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-size:1rem;transition:all .3s}
-.track-dot.done{background:var(--success);border-color:var(--success);color:#fff}
-.track-dot.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 0 0 4px rgba(232,99,26,.2)}
-.track-label{font-size:.72rem;font-weight:700;color:#aaa;line-height:1.3}
-.track-label.done,.track-label.active{color:var(--dark)}
-
-/* ── ADMIN ORDERS ── */
-.admin-layout{display:flex;gap:0;min-height:calc(100vh - 64px)}
-.admin-nav{width:220px;flex-shrink:0;background:var(--dark);padding:1.5rem 0}
-.admin-nav-item{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.5rem;color:#aaa;cursor:pointer;font-weight:600;font-size:.9rem;transition:all .2s;border-left:3px solid transparent}
-.admin-nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
-.admin-nav-item.active{color:var(--primary2);border-left-color:var(--primary);background:rgba(232,99,26,.1)}
-.admin-nav-title{padding:.6rem 1.5rem;font-size:.72rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-top:.5rem}
-.admin-content{flex:1;padding:2rem;background:var(--bg);overflow-y:auto}
-.admin-section{display:none}.admin-section.active{display:block}
-.admin-card{background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.07);margin-bottom:1.5rem}
-.admin-card h3{font-family:'Nunito',sans-serif;font-weight:900;color:var(--dark);margin-bottom:1.2rem;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
-.data-table{width:100%;border-collapse:collapse}
-.data-table thead{background:var(--dark);color:#fff}
-.data-table th{padding:.8rem 1rem;text-align:left;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.data-table td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.88rem;vertical-align:middle}
-.data-table tr:last-child td{border-bottom:none}.data-table tr:hover td{background:#fafafa}
-.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
-.badge-food{background:#fff0e6;color:var(--primary)}.badge-grocery{background:#e6f9f0;color:#1a8a4a}
-.no-val{color:#ccc;font-style:italic;font-size:.82rem}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.form-grid .full{grid-column:1/-1}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center}
-.modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;padding:2rem;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.modal h3{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.2rem;color:var(--dark);margin-bottom:1.5rem;display:flex;justify-content:space-between}
-.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa}
-.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
-.stat-card{background:#fff;border-radius:10px;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center}
-.stat-card .sv{font-family:'Nunito',sans-serif;font-size:2rem;font-weight:900;color:var(--primary)}
-.stat-card .sl{font-size:.82rem;color:#aaa;margin-top:.2rem}
-.back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--primary);font-weight:700;cursor:pointer;margin-bottom:1.2rem;font-size:.9rem}
-.back-link:hover{text-decoration:underline}
-
-/* Admin order row */
-.order-items-mini{font-size:.8rem;color:#888;max-width:200px}
-.status-select{padding:.35rem .7rem;border:1.5px solid var(--border);border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;background:#fff;transition:border-color .2s}
-.status-select:focus{outline:none;border-color:var(--primary)}
-.btn-update-status{padding:.35rem .9rem;font-size:.82rem;margin-left:.4rem}
-.admin-order-filter{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
-.filter-btn{padding:.4rem .9rem;border:1.5px solid var(--border);border-radius:20px;background:#fff;font-size:.82rem;font-weight:700;cursor:pointer;color:#888;transition:all .2s}
-.filter-btn.active{border-color:var(--primary);color:var(--primary);background:#fff8f4}
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:.8rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:700;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
-@media(max-width:700px){.shop-layout,.admin-layout{flex-direction:column}.cat-sidebar,.admin-nav{width:100%;position:static}.form-grid{grid-template-columns:1fr}.cart-sidebar{width:100%}.login-box{width:95vw;padding:1.5rem}.track-label{font-size:.65rem}}
-</style>
-
-<header>
-  <div class="logo" onclick="goHome()">🛍️ <span>Pro</span>Shop</div>
-  <div class="header-right">
-    <span class="user-info" id="userDisplay"></span>
-    <button class="hbtn hbtn-orders" id="myOrdersBtn" onclick="showMyOrders()">📦 My Orders</button>
-    <button class="hbtn hbtn-admin" id="adminPanelBtn" onclick="showPage('adminPanel')">⚙️ Admin Panel</button>
-    <button class="hbtn hbtn-logout" id="logoutBtn" onclick="logout()">Logout</button>
-    <div class="cart-icon" onclick="toggleCart()" id="cartIconWrap" style="display:none">🛒<span class="cart-badge" id="cartBadge">0</span></div>
-  </div>
-</header>
-
-<!-- LOGIN -->
-<div id="login" class="page active">
- <div class="login-wrap"><div class="login-box">
-  <div class="login-logo">🛍️ ProShop <small>Fresh food &amp; groceries, delivered</small></div>
-  <div class="login-tabs">
-    <button class="login-tab active" onclick="switchMainTab('admin')">Admin</button>
-    <button class="login-tab" onclick="switchMainTab('customer')">Customer</button>
-  </div>
-  <div id="adminForm" class="login-form active">
-    <div class="form-group"><label>Username</label><input type="text" id="adminUsername" placeholder="admin"></div>
-    <div class="form-group"><label>Password</label><input type="password" id="adminPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"></div>
-    <div id="adminError" class="form-error"></div>
-    <button class="btn btn-primary" style="width:100%;padding:.8rem" onclick="adminLogin()">Login as Admin</button>
-    <!-- <p style="text-align:center;font-size:.8rem;color:#aaa;margin-top:.8rem">Demo: admin / admin123</p> -->
-  </div>
-  <div id="customerForm" class="login-form">
-    <div class="cust-subtabs">
-      <div class="cust-subtab active" onclick="switchCustTab('login')" id="ctab-login">🔑 Login</div>
-      <div class="cust-subtab" onclick="switchCustTab('register')" id="ctab-register">📝 Register</div>
-      <div class="cust-subtab" onclick="switchCustTab('otp')" id="ctab-otp">📱 OTP</div>
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="logo" onclick="showPage('home')">
+    <div class="logo-icon">✈</div>
+    <div class="logo-text">
+      <strong>Sai Anjenya Yatra</strong>
+      <span>Domestic & International Tours</span>
     </div>
-    <div id="csub-login" class="cust-subform active">
-      <div class="form-group"><label>Mobile Number</label>
-        <div class="phone-row"><div class="phone-prefix">🇮🇳 +91</div>
-          <input type="tel" id="loginPhone" placeholder="Enter your mobile number" maxlength="10" style="flex:1" onkeydown="if(event.key==='Enter')customerLogin()">
-        </div></div>
-      <div class="form-group"><label>Password</label><input type="password" id="loginPwd" placeholder="Enter password" onkeydown="if(event.key==='Enter')customerLogin()"></div>
-      <div id="loginError" class="form-error"></div>
-      <button class="btn btn-primary" style="width:100%;padding:.8rem" onclick="customerLogin()">Login</button>
-      <p style="text-align:center;font-size:.82rem;color:#aaa;margin-top:.8rem">New user? <a href="#" onclick="switchCustTab('register');return false" style="color:var(--primary);font-weight:700">Register here</a></p>
+  </a>
+  <div class="nav-links">
+    <a href="#" onclick="showPage('home')" class="active" id="nav-home">Home</a>
+    <a href="#" onclick="showPage('packages')" id="nav-packages">Packages</a>
+    <a href="#" onclick="showPage('destinations')" id="nav-destinations">Destinations</a>
+    <a href="#" onclick="scrollToContact()">Contact</a>
+  </div>
+  <div class="nav-auth" id="nav-auth">
+    <button class="btn-nav-login" onclick="openModal('login')">Login</button>
+    <button class="btn-nav-signup" onclick="openModal('register')">Sign Up</button>
+  </div>
+  <div class="user-menu" id="user-menu" style="display:none">
+    <button class="user-btn" onclick="toggleUserMenu()">
+      <span>👤</span> <span id="user-name-nav">User</span> <span>▾</span>
+    </button>
+    <div class="user-dropdown" id="user-dropdown">
+      <a href="#" onclick="showPage('bookings')">📋 My Bookings</a>
+      <a href="#" class="logout" onclick="logout()">⬅ Logout</a>
     </div>
-    <div id="csub-register" class="cust-subform">
-      <div class="form-group"><label>Mobile Number</label>
-        <div class="phone-row"><div class="phone-prefix">🇮🇳 +91</div>
-          <input type="tel" id="regPhone" placeholder="9876543210" maxlength="10" style="flex:1">
-        </div></div>
-      <div class="form-group"><label>Create Password (min 4 chars)</label><input type="password" id="regPwd" placeholder="Choose a password"></div>
-      <div class="form-group"><label>Confirm Password</label><input type="password" id="regPwd2" placeholder="Repeat password" onkeydown="if(event.key==='Enter')registerCustomer()"></div>
-      <div id="regError" class="form-error"></div>
-      <div id="regSuccess" class="form-success"></div>
-      <button class="btn btn-success" style="width:100%;padding:.8rem" onclick="registerCustomer()">Create Account</button>
-      <p style="text-align:center;font-size:.82rem;color:#aaa;margin-top:.8rem">Already registered? <a href="#" onclick="switchCustTab('login');return false" style="color:var(--primary);font-weight:700">Login</a></p>
+  </div>
+</nav>
+
+<!-- ══════════════════ HOME PAGE ══════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">✦ One Stop Solution for All Your Travel Needs</div>
+    <h1>Discover the World<br/>with <em>Sai Anjenya Yatra</em></h1>
+    <p>From the beaches of Goa to the Alps of Switzerland — we craft unforgettable journeys for every traveller.</p>
+    <div class="hero-search">
+      <input type="text" id="hero-search" placeholder="Search destinations, packages..." onkeyup="heroSearch(event)"/>
+      <button class="btn-search" onclick="doHeroSearch()">🔍 Search</button>
     </div>
-    <div id="csub-otp" class="cust-subform">
-      <div id="otpPhoneStep">
-        <div class="form-group"><label>Mobile Number</label>
-          <div class="phone-row"><div class="phone-prefix">🇮🇳 +91</div>
-            <input type="tel" id="otpPhone" placeholder="9876543210" maxlength="10" style="flex:1" onkeydown="if(event.key==='Enter')requestOTP()">
-          </div></div>
-        <div id="phoneError" class="form-error"></div>
-        <button class="btn btn-primary" style="width:100%;padding:.8rem" onclick="requestOTP()" id="sendOtpBtn">Send OTP via SMS</button>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong>500+</strong><span>HAPPY CLIENTS</span></div>
+      <div class="hero-stat"><strong>50+</strong><span>DESTINATIONS</span></div>
+      <div class="hero-stat"><strong>10+</strong><span>YEARS EXPERIENCE</span></div>
+      <div class="hero-stat"><strong>4.9★</strong><span>AVERAGE RATING</span></div>
+    </div>
+  </section>
+
+  <!-- FEATURED PACKAGES -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">✦ Handpicked For You</span>
+      <h2>Featured Tour Packages</h2>
+      <p>Our most popular and highly-rated packages curated for an extraordinary travel experience.</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterFeatured('all', this)">All</button>
+      <button class="tab-btn" onclick="filterFeatured('domestic', this)">🇮🇳 Domestic</button>
+      <button class="tab-btn" onclick="filterFeatured('international', this)">🌍 International</button>
+    </div>
+    <div class="cards-grid" id="featured-grid">
+      <div class="loader"><div class="spinner"></div>Loading packages...</div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="section section-alt">
+    <div class="section-header">
+      <span class="section-label">✦ Why Choose Us</span>
+      <h2>Your Journey, Our Passion</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Expert Guidance</h3>
+        <p>Over a decade of experience crafting perfect itineraries tailored to every budget and interest.</p>
       </div>
-      <div id="otpVerifyStep" style="display:none">
-        <p style="text-align:center;font-size:.9rem;color:#666;margin-bottom:1rem">4-digit OTP sent to <strong id="otpPhoneDisplay"></strong></p>
-        <div class="otp-boxes">
-          <input class="otp-box" type="text" maxlength="1" id="otp0" oninput="otpMove(0)" onkeydown="otpBack(event,0)">
-          <input class="otp-box" type="text" maxlength="1" id="otp1" oninput="otpMove(1)" onkeydown="otpBack(event,1)">
-          <input class="otp-box" type="text" maxlength="1" id="otp2" oninput="otpMove(2)" onkeydown="otpBack(event,2)">
-          <input class="otp-box" type="text" maxlength="1" id="otp3" oninput="otpMove(3)" onkeydown="otpBack(event,3)">
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3>Best Price Guarantee</h3>
+        <p>We match or beat any comparable offer. Premium experiences at honest, transparent prices.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Safe & Reliable</h3>
+        <p>Fully insured tours with 24/7 on-ground support. Your safety is our top priority.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌟</div>
+        <h3>Personalised Service</h3>
+        <p>Every tour is customised. From honeymoons to family trips, we design your perfect holiday.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">✦ Traveller Stories</span>
+      <h2>What Our Guests Say</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <p>Our Kerala backwaters trip was absolutely magical. Every detail was perfectly arranged. Will definitely book again!</p>
+        <div class="testimonial-author">
+          <div class="avatar">R</div>
+          <div class="author-info"><strong>Ramesh Iyer</strong><span>Chennai ★★★★★</span></div>
         </div>
-        <div id="otpError" class="form-error"></div>
-        <div id="otpDevHint" class="form-success"></div>
-        <button class="btn btn-primary" style="width:100%;padding:.8rem" onclick="verifyOTP()">Verify &amp; Login</button>
-        <button class="btn btn-outline" style="width:100%;padding:.7rem;margin-top:.5rem" onclick="backToOtpPhone()">← Change Number</button>
       </div>
-    </div>
-  </div>
- </div></div>
-</div>
-
-<!-- HOME / SHOP -->
-<div id="home" class="page">
- <div class="container">
-  <div class="shop-layout">
-   <nav class="cat-sidebar">
-     <div class="cat-title">Categories</div>
-     <div class="cat-item active" onclick="filterCat('all')" id="cat-all"><span>🏠</span> All Items <span class="cat-count" id="cnt-all">0</span></div>
-     <div class="cat-item" onclick="filterCat('AnyTime')" id="cat-AnyTime"><span>🥪</span> AnyTime Food <span class="cat-count" id="cnt-AnyTime">0</span></div>
-     <div class="cat-item" onclick="filterCat('Groceries')" id="cat-Groceries"><span>🛒</span> Groceries <span class="cat-count" id="cnt-Groceries">0</span></div>
-     <div class="cat-item" onclick="filterCat('Pickles')" id="cat-Pickles"><span>🫙</span> Pickles <span class="cat-count" id="cnt-Pickles">0</span></div>
-   </nav>
-   <div class="products-area">
-     <h2 class="section-title" id="catHeading">All Items</h2>
-     <div class="products-grid" id="productsGrid"></div>
-   </div>
-  </div>
- </div>
-</div>
-
-<!-- CHECKOUT -->
-<div id="checkout" class="page">
- <div class="container"><div class="checkout-wrap">
-  <div class="back-link" onclick="backToHome()">← Continue Shopping</div>
-  <h2 class="section-title">Checkout</h2>
-  <div class="checkout-card">
-    <h3>📍 Delivery Location</h3>
-    <div class="pincode-row">
-      <div class="form-group" style="flex:1;margin:0"><input type="text" id="pincode" placeholder="Enter pincode (600063)" maxlength="6" onkeydown="if(event.key==='Enter')checkPincode()"></div>
-      <button class="btn btn-primary" style="height:44px" onclick="checkPincode()">Check</button>
-    </div>
-    <div id="pincodeMsg" class="pincode-msg"></div>
-    <div class="form-group" style="margin-top:1rem"><label>Apartment / Building</label><input type="text" id="apartment" placeholder="e.g. Isha Anandam, Block A"></div>
-    <div class="form-group"><label>Full Address</label><input type="text" id="address" placeholder="Flat no., street, landmark"></div>
-  </div>
-  <div class="checkout-card">
-    <h3>👤 Contact</h3>
-    <div class="form-group"><label>Name</label><input type="text" id="coName" placeholder="Your full name"></div>
-    <div class="form-group"><label>Phone</label><input type="tel" id="coPhone" placeholder="10-digit mobile"></div>
-  </div>
-  <div class="checkout-card">
-    <h3>🧾 Order Summary</h3>
-    <table class="sum-table">
-      <tbody id="summaryItems"></tbody>
-      <tfoot>
-        <tr><td>Subtotal</td><td id="coSubtotal">₹0.00</td></tr>
-        <tr class="sum-delivery"><td>Delivery Fee</td><td id="coDelivery">₹0.00</td></tr>
-        <tr class="sum-total"><td><strong>Total</strong></td><td id="coTotal">₹0.00</td></tr>
-      </tfoot>
-    </table>
-  </div>
-  <button class="btn btn-gpay" style="width:100%;padding:1rem;font-size:1.1rem;border-radius:10px;margin-bottom:.5rem" onclick="proceedToPayment()">💳 Pay with GPay / UPI →</button>
-  <p style="text-align:center;font-size:.8rem;color:#aaa">🔒 Only prepaid orders accepted</p>
- </div></div>
-</div>
-
-<!-- PAYMENT -->
-<div id="payment" class="page">
- <div class="container"><div class="payment-wrap">
-  <div class="back-link" onclick="cancelOrder()">← Back to Checkout</div>
-  <div class="payment-card">
-    <h2>💳 Pay via UPI / GPay</h2>
-    <p style="color:#888;font-size:.9rem">Scan QR or use UPI ID below</p>
-    <div class="payment-amount">₹<span id="payAmount">0</span><small>Amount to pay</small></div>
-    <div class="qr-wrapper"><div id="qrcode"></div></div>
-    <div class="gpay-badge">🇬 GPay &nbsp;|&nbsp; PhonePe &nbsp;|&nbsp; Paytm &nbsp;|&nbsp; Any UPI app</div>
-    <div class="upi-id-box">📲 UPI ID: <strong>9884856840@ybl</strong> &nbsp;·&nbsp; Jayasri</div>
-    <ol class="payment-steps">
-      <li>Open <strong>GPay / PhonePe / Paytm</strong> on your phone</li>
-      <li>Scan the QR code above <em>or</em> pay to UPI ID <strong>9884856840@ybl</strong></li>
-      <li>Enter amount <strong>₹<span class="pay-amt-inline">0</span></strong> exactly and complete payment</li>
-      <li>After payment, enter your <strong>UPI Transaction / UTR reference number</strong> below</li>
-      <li>Click <strong>I have paid – Confirm Order</strong></li>
-    </ol>
-    <div class="form-group" style="text-align:left;margin-top:.5rem">
-      <label>UPI Transaction Reference (optional but helps track)</label>
-      <div class="ref-input-group">
-        <input type="text" id="upiRefInput" placeholder="e.g. 407812345678 (leave blank if unknown)">
-      </div>
-      <div id="payError" class="form-error" style="margin-top:.5rem"></div>
-    </div>
-      <button class="btn btn-success" id="confirmPayBtn" style="width:100%;padding:1rem;font-size:1.05rem;border-radius:10px;margin-top:.5rem" onclick="confirmPayment()">✅ I have paid – Confirm Order</button>
-    <p style="font-size:.8rem;color:#aaa;margin-top:.8rem">⚠️ Click only after completing payment. Admin will verify manually.</p>
-  </div>
-  <button class="btn btn-outline" style="width:100%;padding:.8rem" onclick="cancelOrder()">Cancel &amp; Go Back</button>
- </div></div>
-</div>
-
-<!-- CONFIRMATION -->
-<div id="confirmation" class="page">
- <div class="container">
-  <div class="confirm-card">
-    <div class="confirm-icon">✅</div>
-    <h2 style="font-family:'Nunito',sans-serif;color:var(--success);margin-bottom:.5rem">Order Placed!</h2>
-    <p id="confirmMsg" style="color:#555;margin:.5rem 0"></p>
-    <p style="color:#888">Order ID: <strong id="confirmOrderId"></strong></p>
-    <div class="confirm-ref" id="confirmRef"></div>
-    <p style="font-size:.85rem;color:#aaa;margin-top:.3rem">📦 Admin will confirm after verifying payment!</p>
-    <div style="display:flex;gap:.8rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap">
-      <button class="btn btn-primary" style="padding:.8rem 2rem" onclick="showMyOrders()">📦 Track My Order</button>
-      <button class="btn btn-outline" style="padding:.8rem 2rem" onclick="backToHome()">Continue Shopping</button>
-    </div>
-  </div>
- </div>
-</div>
-
-<!-- MY ORDERS (customer) -->
-<div id="myOrders" class="page">
- <div class="container">
-  <div class="orders-wrap">
-    <div class="back-link" onclick="backToHome()">← Back to Shop</div>
-    <h2 class="section-title">📦 My Orders</h2>
-    <div id="myOrdersList"><p style="text-align:center;color:#aaa;padding:3rem">Loading your orders...</p></div>
-  </div>
- </div>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="page">
- <div class="admin-layout">
-  <div class="admin-nav">
-    <div class="admin-nav-title">Admin</div>
-    <div class="admin-nav-item active" onclick="switchAdmin('dashboard')" id="anav-dashboard">📊 Dashboard</div>
-    <div class="admin-nav-item" onclick="switchAdmin('orders')" id="anav-orders">🛒 Orders</div>
-    <div class="admin-nav-item" onclick="switchAdmin('products')" id="anav-products">📦 Products</div>
-    <div class="admin-nav-item" onclick="switchAdmin('users')" id="anav-users">👥 Customers</div>
-    <div class="admin-nav-title">Shop</div>
-    <div class="admin-nav-item" onclick="goHome()">🏠 Back to Shop</div>
-  </div>
-  <div class="admin-content">
-    <!-- Dashboard -->
-    <div id="asec-dashboard" class="admin-section active">
-      <h2 class="section-title">Dashboard</h2>
-      <div class="stat-cards" id="statCards"></div>
-      <div class="admin-card">
-        <h3>🔔 Recent Orders <span style="font-size:.82rem;color:#aaa;font-weight:400">Pending action</span></h3>
-        <div id="dashRecentOrders"></div>
-      </div>
-    </div>
-    <!-- Orders -->
-    <div id="asec-orders" class="admin-section">
-      <h2 class="section-title">Manage Orders</h2>
-      <div class="admin-card">
-        <h3>🛒 All Orders</h3>
-        <div class="admin-order-filter" id="orderFilterBtns">
-          <button class="filter-btn active" onclick="filterAdminOrders('all')" id="ofbtn-all">All</button>
-          <button class="filter-btn" onclick="filterAdminOrders('confirmed')" id="ofbtn-confirmed">✅ Confirmed</button>
-          <button class="filter-btn" onclick="filterAdminOrders('preparing')" id="ofbtn-preparing">👨‍🍳 Preparing</button>
-          <button class="filter-btn" onclick="filterAdminOrders('on_the_way')" id="ofbtn-on_the_way">🛵 On the Way</button>
-          <button class="filter-btn" onclick="filterAdminOrders('delivered')" id="ofbtn-delivered">✅ Delivered</button>
-          <button class="filter-btn" onclick="filterAdminOrders('cancelled')" id="ofbtn-cancelled">❌ Cancelled</button>
+      <div class="testimonial">
+        <p>The Bali honeymoon package was beyond our expectations. The villa, the sunsets, the food — everything was perfect.</p>
+        <div class="testimonial-author">
+          <div class="avatar">P</div>
+          <div class="author-info"><strong>Priya & Karthik</strong><span>Bangalore ★★★★★</span></div>
         </div>
-        <div style="overflow-x:auto">
-          <table class="data-table">
-            <thead><tr>
-              <th>#</th><th>Order ID</th><th>Customer</th><th>Items</th>
-              <th>Amount</th><th>UPI Ref</th><th>Date</th><th>Status</th><th>Update</th>
-            </tr></thead>
-            <tbody id="ordersAdminBody"></tbody>
-          </table>
+      </div>
+      <div class="testimonial">
+        <p>Booked Dubai for our anniversary. The desert safari was the highlight of our lives. Brilliant team, brilliant service!</p>
+        <div class="testimonial-author">
+          <div class="avatar">S</div>
+          <div class="author-info"><strong>Sridhar Narayanan</strong><span>Hyderabad ★★★★★</span></div>
         </div>
       </div>
     </div>
-    <!-- Products -->
-    <div id="asec-products" class="admin-section">
-      <h2 class="section-title">Products</h2>
-      <div class="admin-card">
-        <h3>📦 All Products <button class="btn btn-primary btn-sm" onclick="openAddProduct()">+ Add Product</button></h3>
-        <div style="overflow-x:auto">
-          <table class="data-table"><thead><tr>
-            <th>#</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Max Qty</th><th>Delivery Fee</th><th>Actions</th>
-          </tr></thead><tbody id="productsAdminBody"></tbody></table>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section section-alt" id="contact-section">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <span class="section-label">✦ Get In Touch</span>
+        <h2>Plan Your Dream Trip Today</h2>
+        <p>Fill out the form and our travel experts will get back to you within 24 hours with a personalised itinerary.</p>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📍</div>
+          <div>
+            <h4>Our Office</h4>
+            <p>Tambaram, Chennai, Tamil Nadu, India</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📞</div>
+          <div>
+            <h4>Call Us</h4>
+            <p>+91 98765 43210</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">✉️</div>
+          <div>
+            <h4>Email Us</h4>
+            <p>info@saianjenya.com</p>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- Users -->
-    <div id="asec-users" class="admin-section">
-      <h2 class="section-title">Registered Customers</h2>
-      <div class="admin-card">
-        <h3>👥 Customers</h3>
-        <div style="overflow-x:auto">
-          <table class="data-table"><thead><tr>
-            <th>#</th><th>Phone</th><th>Registered</th><th>Apartment</th><th>Address</th><th>Pincode</th>
-          </tr></thead><tbody id="usersAdminBody"></tbody></table>
+      <div class="contact-form">
+        <h3>Send an Enquiry</h3>
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="enq-name" placeholder="Full name"/>
         </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="enq-email" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="enq-phone" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="enq-message" placeholder="Tell us about your dream trip..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="submitEnquiry()">Send Enquiry ✈</button>
       </div>
     </div>
-  </div>
- </div>
+  </section>
+
 </div>
 
-<!-- CART -->
-<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-<div class="cart-sidebar" id="cartSidebar">
-  <div class="cart-header"><h3>🛒 Cart</h3><button class="cart-close" onclick="toggleCart()">✕</button></div>
-  <div class="cart-items" id="cartItems"><div class="cart-empty"><p style="font-size:2rem">🛒</p><p>Your cart is empty</p></div></div>
-  <div class="cart-footer">
-    <div class="cf-row"><span>Subtotal</span><span id="cartSubtotal">₹0.00</span></div>
-    <div class="cf-row"><span>Delivery fee</span><span id="cartDeliveryFee">—</span></div>
-    <div class="cf-note">Per-product fee applied at checkout</div>
-    <div class="cf-total"><span>Est. Total</span><span id="cartTotal">₹0.00</span></div>
-    <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout →</button>
-  </div>
+<!-- ══════════════════ PACKAGES PAGE ══════════════════ -->
+<div id="page-packages" class="page" style="padding-top:72px">
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">✦ Explore</span>
+      <h2>All Tour Packages</h2>
+      <p>Browse our complete collection of domestic and international tour packages.</p>
+    </div>
+    <div style="display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap;">
+      <input type="text" id="pkg-search" placeholder="Search packages..." style="padding:10px 20px; border:1.5px solid #e8ecf0; border-radius:50px; font-size:14px; outline:none; min-width:280px;" oninput="loadPackages()"/>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setPkgCategory('', this)">All</button>
+      <button class="tab-btn" onclick="setPkgCategory('domestic', this)">🇮🇳 Domestic</button>
+      <button class="tab-btn" onclick="setPkgCategory('international', this)">🌍 International</button>
+    </div>
+    <div class="cards-grid" id="packages-grid">
+      <div class="loader"><div class="spinner"></div>Loading...</div>
+    </div>
+  </section>
 </div>
 
-<!-- PRODUCT MODAL -->
-<div class="modal-overlay" id="productModal">
+<!-- ══════════════════ DESTINATIONS PAGE ══════════════════ -->
+<div id="page-destinations" class="page" style="padding-top:72px">
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">✦ Explore</span>
+      <h2>Our Destinations</h2>
+      <p>From the mountains of Himachal to the shores of Bali — choose your next adventure.</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setDestCategory('', this)">All</button>
+      <button class="tab-btn" onclick="setDestCategory('domestic', this)">🇮🇳 Domestic</button>
+      <button class="tab-btn" onclick="setDestCategory('international', this)">🌍 International</button>
+    </div>
+    <div class="cards-grid" id="destinations-grid">
+      <div class="loader"><div class="spinner"></div>Loading...</div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════════ MY BOOKINGS PAGE ══════════════════ -->
+<div id="page-bookings" class="page" style="padding-top:72px">
+  <section class="section">
+    <div class="section-header">
+      <span class="section-label">✦ My Account</span>
+      <h2>My Bookings</h2>
+    </div>
+    <div id="bookings-list">
+      <div class="loader"><div class="spinner"></div>Loading...</div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════════════ MODALS ══════════════════ -->
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="modal-login">
   <div class="modal">
-    <h3><span id="modalTitle">Add Product</span><button class="modal-close" onclick="closeModal()">✕</button></h3>
-    <input type="hidden" id="editProductId">
-    <div class="form-grid">
-      <div class="form-group full"><label>Product Name *</label><input type="text" id="pName" placeholder="e.g. Veg Sandwich"></div>
-      <div class="form-group full"><label>Description</label><textarea id="pDesc" placeholder="AnyTime | Description..."></textarea></div>
-      <div class="form-group"><label>Price (₹) *</label><input type="number" id="pPrice" placeholder="60" min="0" step="0.5"></div>
-      <div class="form-group"><label>Stock</label><input type="number" id="pStock" placeholder="50" min="0"></div>
-      <div class="form-group"><label>Max Qty Per Order</label><input type="number" id="pMaxQty" placeholder="10" min="1" max="50"></div>
-      <div class="form-group"><label>Delivery Fee (₹)</label><input type="number" id="pDeliveryFee" placeholder="0 or 40" min="0" step="5"><small style="color:#aaa;font-size:.78rem">0 = free delivery</small></div>
-      <div class="form-group full"><label>Image URL</label><input type="url" id="pImageUrl" placeholder="https://images.unsplash.com/..."></div>
+    <button class="modal-close" onclick="closeModal('login')">✕</button>
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Login to access your bookings and more.</p>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="your@email.com"/>
     </div>
-    <div id="modalError" class="form-error"></div>
-    <div style="display:flex;gap:.8rem;margin-top:1rem">
-      <button class="btn btn-primary" style="flex:1;padding:.85rem" onclick="saveProduct()">💾 Save Product</button>
-      <button class="btn btn-outline" style="flex:1;padding:.85rem" onclick="closeModal()">Cancel</button>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••"/>
     </div>
+    <button class="btn-primary" onclick="doLogin()">Login →</button>
+    <div class="modal-switch">Don't have an account? <a onclick="switchModal('login','register')">Sign Up</a></div>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- Register Modal -->
+<div class="modal-overlay" id="modal-register">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('register')">✕</button>
+    <h2>Create Account</h2>
+    <p class="subtitle">Join us and start planning your dream trip.</p>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="reg-name" placeholder="Your full name"/>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="reg-email" placeholder="your@email.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="reg-password" placeholder="Minimum 6 characters"/>
+    </div>
+    <button class="btn-primary" onclick="doRegister()">Create Account →</button>
+    <div class="modal-switch">Already have an account? <a onclick="switchModal('register','login')">Login</a></div>
+  </div>
+</div>
+
+<!-- Package Detail Modal -->
+<div class="modal-overlay" id="modal-package">
+  <div class="modal pkg-modal">
+    <button class="modal-close" onclick="closeModal('package')">✕</button>
+    <div id="package-detail-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
-const API_BASE = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'  ? 'http://127.0.0.1:5000/api'   : '/api';  
-const VALID_PINCODE = '600063';
-const SERVED_APTS = ['Isha Anandam','Isha Shubham','Isha Santhosham','TVS Green Hills Apartment','SSM Nagar'];
-const UPI_ID = '9884856840@ybl';
-const UPI_NAME = 'Jayasri';
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-icon">✈</div>
+        <div class="logo-text">
+          <strong style="color:#fff">Sai Anjenya Yatra</strong>
+          <span>Domestic & International Tours</span>
+        </div>
+      </div>
+      <p>Your one-stop solution for all travel needs. Crafting unforgettable journeys across India and the world since 2014.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a href="#" onclick="showPage('home')">Home</a>
+      <a href="#" onclick="showPage('packages')">Packages</a>
+      <a href="#" onclick="showPage('destinations')">Destinations</a>
+      <a href="#" onclick="scrollToContact()">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Domestic Tours</h4>
+      <a href="#">Goa Beach Bliss</a>
+      <a href="#">Kerala Backwaters</a>
+      <a href="#">Royal Rajasthan</a>
+      <a href="#">Andaman Paradise</a>
+    </div>
+    <div class="footer-col">
+      <h4>International</h4>
+      <a href="#">Bali Honeymoon</a>
+      <a href="#">Dubai Glamour</a>
+      <a href="#">Thailand Explorer</a>
+      <a href="#">Switzerland Alps</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 <span>Sai Anjenya Yatra</span>. All rights reserved. Designed with ❤ for travellers.</p>
+  </div>
+</footer>
 
-const _fetch = window.fetch;
-window.fetch = async (...args) => {
-  const r = await _fetch(...args);
-  const clone = r.clone();
-  clone.text().then(t => console.log(args[0], r.status, t.slice(0, 200)));
-  return r;
+<script>
+const API = 'http://localhost:5000/api';
+let currentUser = JSON.parse(localStorage.getItem('say_user') || 'null');
+let currentToken = localStorage.getItem('say_token') || '';
+let allPackages = [];
+let pkgCategory = '';
+let destCategory = '';
+let featuredCategory = 'all';
+
+// ── INIT ──
+window.onload = () => {
+  updateAuthUI();
+  loadFeaturedPackages();
 };
 
-let currentUser = null, allProducts = [], cart = {}, activeCat = 'all';
-let pincodeOk = false, pendingOrder = null;
-let allAdminOrders = [], adminOrderFilter = 'all';
-
-// ── AUTH HEADERS (replaces cookies/sessions entirely) ─────────────────
-// Stores user_id in localStorage; sends as X-User-ID header on every request.
-// This works regardless of file://, cross-port, or any CORS setup.
-function authHeaders(extra = {}) {
-  const h = { 'Content-Type': 'application/json', ...extra };
-  if (currentUser && currentUser.user_id) {
-    h['X-User-ID'] = String(currentUser.user_id);
-  }
-  return h;
-}
-async function api(url, opts = {}) {
-  const r = await fetch(url, {
-    ...opts,
-    headers: authHeaders(opts.headers || {})
-  });
-  
-  // Clone so we can read body twice if needed
-  const text = await r.text();
-  
-  if (!text || !text.trim()) {
-    // Empty body — return a safe fallback
-    return { ok: r.ok, status: r.status, json: async () => ({}) };
-  }
-  
-  // Re-wrap as a response-like object with safe .json()
-  return {
-    ok: r.ok,
-    status: r.status,
-    json: async () => {
-      try { return JSON.parse(text); }
-      catch { throw new Error(`Invalid JSON from ${url}: ${text.slice(0, 100)}`); }
-    }
-  };
-}
-function saveCurrentUser() {
-  if (currentUser) localStorage.setItem('proshop_user', JSON.stringify(currentUser));
-  else localStorage.removeItem('proshop_user');
-}
-function loadCurrentUser() {
-  try {
-    const s = localStorage.getItem('proshop_user');
-    return s ? JSON.parse(s) : null;
-  } catch { return null; }
-}
-
-// ── UTILS ──────────────────────────────────────────────────────────────
-function showPage(n) {
+// ── PAGE NAVIGATION ──
+function showPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(n).classList.add('active');
-  if (n === 'adminPanel') { loadAdminDashboard(); switchAdmin('dashboard'); }
-  if (n === 'myOrders') loadMyOrders();
-}
-function backToHome() { showPage('home'); }
-function goHome() { if (currentUser) showPage('home'); }
-
-function showToast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'packages') loadPackages();
+  if (page === 'destinations') loadDestinations();
+  if (page === 'bookings') loadMyBookings();
 }
 
-function showErr(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
-function hideErr(id) { const el = document.getElementById(id); el.textContent = ''; el.classList.remove('show'); }
-
-// ── AUTH TABS ──────────────────────────────────────────────────────────
-function switchMainTab(t) {
-  document.querySelectorAll('.login-tab').forEach((el, i) => el.classList.toggle('active', (t === 'admin' && i === 0) || (t === 'customer' && i === 1)));
-  document.getElementById('adminForm').classList.toggle('active', t === 'admin');
-  document.getElementById('customerForm').classList.toggle('active', t === 'customer');
-}
-function switchCustTab(s) {
-  ['login','register','otp'].forEach(x => {
-    document.getElementById('ctab-' + x).classList.toggle('active', x === s);
-    document.getElementById('csub-' + x).classList.toggle('active', x === s);
-  });
+function scrollToContact() {
+  showPage('home');
+  setTimeout(() => document.getElementById('contact-section').scrollIntoView({behavior:'smooth'}), 100);
 }
 
-// ── USER UI ────────────────────────────────────────────────────────────
-function updateUserUI() {
-  const ud = document.getElementById('userDisplay');
-  const lb = document.getElementById('logoutBtn');
-  const ab = document.getElementById('adminPanelBtn');
-  const ob = document.getElementById('myOrdersBtn');
-  const ci = document.getElementById('cartIconWrap');
+// ── AUTH ──
+function updateAuthUI() {
   if (currentUser) {
-    ud.innerHTML = `Welcome, <strong>${currentUser.username || ('+91 ' + currentUser.phone)}</strong>`;
-    lb.style.display = 'inline-block';
-    ab.style.display = currentUser.role === 'admin' ? 'inline-block' : 'none';
-    ob.style.display = currentUser.role === 'customer' ? 'inline-block' : 'none';
-    ci.style.display = currentUser.role === 'customer' ? 'block' : 'none';
+    document.getElementById('nav-auth').style.display = 'none';
+    document.getElementById('user-menu').style.display = 'flex';
+    document.getElementById('user-name-nav').textContent = currentUser.name.split(' ')[0];
   } else {
-    ud.innerHTML = '';
-    lb.style.display = 'none';
-    ab.style.display = 'none';
-    ob.style.display = 'none';
-    ci.style.display = 'none';
+    document.getElementById('nav-auth').style.display = 'flex';
+    document.getElementById('user-menu').style.display = 'none';
   }
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu')) {
+    document.getElementById('user-dropdown').classList.remove('open');
+  }
+});
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { showToast('Please fill all fields', 'error'); return; }
+  try {
+    const res = await fetch(API + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error, 'error'); return; }
+    currentUser = data.user; currentToken = data.token;
+    localStorage.setItem('say_user', JSON.stringify(data.user));
+    localStorage.setItem('say_token', data.token);
+    closeModal('login'); updateAuthUI();
+    showToast('Welcome back, ' + data.user.name + '!', 'success');
+  } catch(e) { showToast('Server error. Is the backend running?', 'error'); }
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) { showToast('Please fill all fields', 'error'); return; }
+  try {
+    const res = await fetch(API + '/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password})
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error, 'error'); return; }
+    currentUser = data.user; currentToken = data.token;
+    localStorage.setItem('say_user', JSON.stringify(data.user));
+    localStorage.setItem('say_token', data.token);
+    closeModal('register'); updateAuthUI();
+    showToast('Welcome, ' + data.user.name + '!', 'success');
+  } catch(e) { showToast('Server error. Is the backend running?', 'error'); }
 }
 
 function logout() {
-  currentUser = null; cart = {}; pendingOrder = null;
-  saveCurrentUser();
-  updateUserUI(); updateCartUI(); showPage('login');
+  currentUser = null; currentToken = '';
+  localStorage.removeItem('say_user'); localStorage.removeItem('say_token');
+  updateAuthUI(); showPage('home');
+  showToast('Logged out successfully', 'success');
+  document.getElementById('user-dropdown').classList.remove('open');
 }
 
-// ── LOGIN ──────────────────────────────────────────────────────────────
-async function adminLogin() {
-  const u = document.getElementById('adminUsername').value.trim();
-  const p = document.getElementById('adminPassword').value;
-  hideErr('adminError');
-  if (!u || !p) { showErr('adminError', 'Enter username and password'); return; }
+// ── PACKAGES ──
+async function loadFeaturedPackages() {
   try {
-    const r = await fetch(`${API_BASE}/auth/admin-login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: u, password: p })
-    });
-    const d = await r.json();
-    if (d.success) {
-      currentUser = { role: 'admin', username: u, user_id: d.user_id };
-      saveCurrentUser();
-      updateUserUI();
-      await loadProducts();
-      showPage('adminPanel');
-    } else showErr('adminError', d.error || 'Login failed');
-  } catch (e) { showErr('adminError', e.message); }
-}
-
-async function customerLogin() {
-  const phone = document.getElementById('loginPhone').value.trim();
-  const pwd = document.getElementById('loginPwd').value;
-  hideErr('loginError');
-  if (!phone || !pwd) { showErr('loginError', 'Enter mobile and password'); return; }
-  try {
-    const r = await fetch(`${API_BASE}/auth/customer-login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd })
-    });
-    const d = await r.json();
-    if (d.success) {
-      currentUser = { role: 'customer', phone, user_id: d.user_id };
-      saveCurrentUser();
-      updateUserUI(); await loadProducts(); showPage('home');
-      prefillAddress(d.saved_address);
-    } else showErr('loginError', d.error || 'Login failed');
-  } catch (e) { showErr('loginError', e.message); }
-}
-
-async function registerCustomer() {
-  const phone = document.getElementById('regPhone').value.trim();
-  const pwd = document.getElementById('regPwd').value;
-  const pwd2 = document.getElementById('regPwd2').value;
-  hideErr('regError'); document.getElementById('regSuccess').classList.remove('show');
-  if (!/^[6-9]\d{9}$/.test(phone)) { showErr('regError', 'Valid 10-digit Indian mobile required'); return; }
-  if (!pwd || pwd.length < 4) { showErr('regError', 'Password must be at least 4 characters'); return; }
-  if (pwd !== pwd2) { showErr('regError', 'Passwords do not match'); return; }
-  try {
-    const r = await fetch(`${API_BASE}/auth/register`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd })
-    });
-    const d = await r.json();
-    if (d.success) {
-      currentUser = { role: 'customer', phone, user_id: d.user_id };
-      saveCurrentUser();
-      updateUserUI(); await loadProducts(); showPage('home');
-    } else showErr('regError', d.error || 'Registration failed');
-  } catch (e) { showErr('regError', e.message); }
-}
-
-async function requestOTP() {
-  const phone = document.getElementById('otpPhone').value.trim();
-  hideErr('phoneError');
-  if (!/^[6-9]\d{9}$/.test(phone)) { showErr('phoneError', 'Valid 10-digit number required'); return; }
-  const btn = document.getElementById('sendOtpBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
-  try {
-    const r = await fetch(`${API_BASE}/auth/request-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone }) });
-    const d = await r.json();
-    if (d.success) {
-      document.getElementById('otpPhoneDisplay').textContent = '+91-' + phone;
-      document.getElementById('otpPhoneStep').style.display = 'none';
-      document.getElementById('otpVerifyStep').style.display = 'block';
-      document.getElementById('otp0').focus();
-      if (d.otp) { const h = document.getElementById('otpDevHint'); h.textContent = 'Dev: OTP is ' + d.otp; h.classList.add('show'); }
-    } else showErr('phoneError', d.error || 'Failed to send OTP');
-  } catch (e) { showErr('phoneError', e.message); }
-  btn.disabled = false; btn.textContent = 'Send OTP via SMS';
-}
-function backToOtpPhone() {
-  document.getElementById('otpPhoneStep').style.display = 'block';
-  document.getElementById('otpVerifyStep').style.display = 'none';
-  for (let i = 0; i < 4; i++) document.getElementById('otp' + i).value = '';
-}
-function otpMove(i) { if (document.getElementById('otp' + i).value && i < 3) document.getElementById('otp' + (i + 1)).focus(); }
-function otpBack(e, i) { if (e.key === 'Backspace' && !document.getElementById('otp' + i).value && i > 0) document.getElementById('otp' + (i - 1)).focus(); }
-async function verifyOTP() {
-  const phone = document.getElementById('otpPhone').value.trim();
-  const otp = [0,1,2,3].map(i => document.getElementById('otp' + i).value).join('');
-  hideErr('otpError');
-  if (otp.length !== 4) { showErr('otpError', 'Enter all 4 digits'); return; }
-  try {
-    const r = await fetch(`${API_BASE}/auth/verify-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, otp }) });
-    const d = await r.json();
-    if (d.success) {
-      currentUser = { role: 'customer', phone, user_id: d.user_id };
-      saveCurrentUser();
-      updateUserUI(); await loadProducts(); showPage('home'); prefillAddress(d.saved_address);
-    } else showErr('otpError', d.error || 'Verification failed');
-  } catch (e) { showErr('otpError', e.message); }
-}
-
-function prefillAddress(s) {
-  if (!s) return;
-  if (s.pincode) document.getElementById('pincode').value = s.pincode;
-  if (s.address) document.getElementById('address').value = s.address;
-  if (s.apartment) document.getElementById('apartment').value = s.apartment;
-  if (s.pincode === VALID_PINCODE) { pincodeOk = true; showPincodeOk(); }
-}
-
-// ── PRODUCTS ───────────────────────────────────────────────────────────
-function getCat(p) {
-  const d = p.description || '';
-  if (d.includes('Pickles')) return 'Pickles';
-  if (d.includes('Groceries')) return 'Groceries';
-  return 'AnyTime';
-}
-
-async function loadProducts() {
-  try {
-    const r = await fetch(`${API_BASE}/products`);
-    allProducts = await r.json();
-    buildCatCounts();
-    renderProducts(activeCat);
-  } catch (e) { console.error('Load products error:', e); }
-}
-
-function buildCatCounts() {
-  const c = { all: allProducts.length, AnyTime: 0, Groceries: 0, Pickles: 0 };
-  allProducts.forEach(p => c[getCat(p)]++);
-  Object.entries(c).forEach(([k, v]) => { const el = document.getElementById('cnt-' + k); if (el) el.textContent = v; });
-}
-
-function filterCat(cat) {
-  activeCat = cat;
-  document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('cat-' + cat).classList.add('active');
-  const lb = { all: 'All Items', AnyTime: '🥪 AnyTime Food', Groceries: '🛒 Groceries', Pickles: '🫙 Pickles' };
-  document.getElementById('catHeading').textContent = lb[cat] || cat;
-  renderProducts(cat);
-}
-
-function renderProducts(cat) {
-  const list = cat === 'all' ? allProducts : allProducts.filter(p => getCat(p) === cat);
-  const isAdm = currentUser && currentUser.role === 'admin';
-  document.getElementById('productsGrid').innerHTML = list.map(p => {
-    const qty = cart[p.id] ? cart[p.id].qty : 0;
-    const maxQty = p.max_qty || 10;
-    const ft = (p.delivery_fee === 0 || p.delivery_fee === null)
-      ? `<span class="tag tag-free">Free delivery</span>`
-      : `<span class="tag tag-paid">+₹${p.delivery_fee} delivery</span>`;
-    return `<div class="product-card" id="pcard-${p.id}">
-      ${isAdm ? `<div class="admin-card-actions"><button class="btn btn-warning btn-sm" onclick="openEditProduct(${p.id})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑</button></div>` : ''}
-      <img src="${p.image_url || 'https://via.placeholder.com/300x160?text=No+Image'}" alt="${p.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x160?text=No+Image'">
-      <div class="product-info">
-        <div class="product-cat">${getCat(p)}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-meta">${ft} · max ${maxQty}/order</div>
-        <div class="product-price">₹${Number(p.price).toFixed(2)}</div>
-        ${isAdm ? '' : (qty === 0
-          ? `<button class="add-first-btn" onclick="addOne(${p.id})">+ Add</button>`
-          : `<div class="qty-control"><button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button><span class="qty-display">${qty}</span><button class="qty-btn" onclick="changeQty(${p.id},1)">+</button></div>`
-        )}
-      </div></div>`;
-  }).join('');
-}
-
-function refreshCard(pid) {
-  const p = allProducts.find(x => x.id === pid);
-  if (!p) return;
-  const isAdm = currentUser && currentUser.role === 'admin';
-  const qty = cart[pid] ? cart[pid].qty : 0;
-  const maxQty = p.max_qty || 10;
-  const cardEl = document.getElementById('pcard-' + pid);
-  if (!cardEl) return;
-  const infoEl = cardEl.querySelector('.product-info');
-  if (!infoEl) return;
-  const ctrlEl = infoEl.querySelector('.qty-control, .add-first-btn');
-  if (ctrlEl) ctrlEl.remove();
-  if (!isAdm) {
-    const newEl = document.createElement('div');
-    newEl.innerHTML = qty === 0
-      ? `<button class="add-first-btn" onclick="addOne(${pid})">+ Add</button>`
-      : `<div class="qty-control"><button class="qty-btn" onclick="changeQty(${pid},-1)">−</button><span class="qty-display">${qty}</span><button class="qty-btn" onclick="changeQty(${pid},1)">+</button></div>`;
-    infoEl.appendChild(newEl.firstChild);
+    const res = await fetch(API + '/packages?featured=true');
+    const data = await res.json();
+    allPackages = data;
+    renderFeatured(data);
+  } catch(e) {
+    document.getElementById('featured-grid').innerHTML = '<p style="text-align:center;color:var(--muted)">Could not load packages. Make sure the backend is running.</p>';
   }
 }
 
-// ── CART ───────────────────────────────────────────────────────────────
-function addOne(pid) {
-  const p = allProducts.find(x => x.id === pid);
-  if (!p) return;
-  cart[pid] = { id: pid, qty: 1, name: p.name, price: p.price, image_url: p.image_url, delivery_fee: p.delivery_fee || 0 };
-  updateCartUI();
-  refreshCard(pid);
+function filterFeatured(cat, btn) {
+  featuredCategory = cat;
+  document.querySelectorAll('#page-home .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = cat === 'all' ? allPackages : allPackages.filter(p => p.category === cat);
+  renderFeatured(filtered);
 }
 
-function changeQty(pid, delta) {
-  const p = allProducts.find(x => x.id === pid);
-  if (!p) return;
-  const maxQty = p.max_qty || 10;
-  if (!cart[pid]) {
-    if (delta > 0) cart[pid] = { id: pid, qty: 1, name: p.name, price: p.price, image_url: p.image_url, delivery_fee: p.delivery_fee || 0 };
-  } else {
-    const newQty = cart[pid].qty + delta;
-    if (newQty <= 0) delete cart[pid];
-    else if (newQty > maxQty) { showToast(`Max ${maxQty} per order`); return; }
-    else cart[pid].qty = newQty;
-  }
-  updateCartUI();
-  refreshCard(pid);
+function renderFeatured(packages) {
+  const grid = document.getElementById('featured-grid');
+  if (!packages.length) { grid.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No packages found.</p>'; return; }
+  grid.innerHTML = packages.slice(0,6).map(p => packageCard(p)).join('');
 }
 
-function removeFromCart(pid) { delete cart[pid]; updateCartUI(); refreshCard(pid); }
+async function loadPackages() {
+  const search = document.getElementById('pkg-search')?.value || '';
+  const url = `${API}/packages?category=${pkgCategory}&search=${search}`;
+  document.getElementById('packages-grid').innerHTML = '<div class="loader"><div class="spinner"></div>Loading...</div>';
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const grid = document.getElementById('packages-grid');
+    if (!data.length) { grid.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No packages found.</p>'; return; }
+    grid.innerHTML = data.map(p => packageCard(p)).join('');
+  } catch(e) { document.getElementById('packages-grid').innerHTML = '<p style="text-align:center;color:var(--muted)">Error loading packages.</p>'; }
+}
 
-function updateCartUI() {
-  const items = Object.values(cart);
-  const count = items.reduce((s, i) => s + i.qty, 0);
-  const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const fee = items.reduce((s, i) => Math.max(s, i.delivery_fee || 0), 0);
-  document.getElementById('cartBadge').textContent = count;
-  document.getElementById('cartSubtotal').textContent = `₹${sub.toFixed(2)}`;
-  document.getElementById('cartDeliveryFee').textContent = count > 0 ? `~₹${fee}` : '—';
-  document.getElementById('cartTotal').textContent = count > 0 ? `₹${(sub + fee).toFixed(2)}` : '₹0.00';
-  const div = document.getElementById('cartItems');
-  if (!items.length) {
-    div.innerHTML = `<div class="cart-empty"><p style="font-size:2rem">🛒</p><p>Your cart is empty</p></div>`;
-    return;
-  }
-  div.innerHTML = items.map(item =>
-    `<div class="cart-item">
-      <img src="${item.image_url || ''}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/56?text=IMG'">
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price">₹${(item.price * item.qty).toFixed(2)}</div>
-        <div class="cart-qty-row">
-          <button class="cqty-btn" onclick="changeQty(${item.id},-1)">−</button>
-          <span class="cqty-num">${item.qty}</span>
-          <button class="cqty-btn" onclick="changeQty(${item.id},1)">+</button>
+function setPkgCategory(cat, btn) {
+  pkgCategory = cat;
+  document.querySelectorAll('#page-packages .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadPackages();
+}
+
+function packageCard(p) {
+  const stars = '★'.repeat(Math.round(p.rating || 0)) + '☆'.repeat(5 - Math.round(p.rating || 0));
+  return `
+    <div class="card" onclick="openPackage(${p.id})">
+      <div class="card-img">
+        <img src="${p.image_url || 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=600'}" alt="${p.title}" loading="lazy"/>
+        <span class="card-badge ${p.category === 'international' ? 'intl' : ''}">${p.category === 'domestic' ? '🇮🇳 Domestic' : '🌍 International'}</span>
+      </div>
+      <div class="card-body">
+        <h3>${p.title}</h3>
+        <div class="card-meta">
+          <span>📍 <b>${p.destination_name || ''}</b></span>
+          <span>⏱ <b>${p.duration_days} Days</b></span>
+          <span>👥 Max <b>${p.max_persons}</b></span>
+        </div>
+        <div class="card-rating">
+          <span class="stars">${stars}</span>
+          <span class="rating-num">${p.rating || 0} (${p.num_reviews || 0} reviews)</span>
         </div>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart(${item.id})">🗑</button>
-    </div>`
-  ).join('');
-}
-
-function toggleCart() {
-  document.getElementById('cartSidebar').classList.toggle('show');
-  document.getElementById('cartOverlay').classList.toggle('show');
-}
-
-// ── CHECKOUT ───────────────────────────────────────────────────────────
-function proceedToCheckout() {
-  if (!currentUser) { alert('Please login to checkout'); toggleCart(); showPage('login'); return; }
-  if (!Object.keys(cart).length) { alert('Your cart is empty!'); return; }
-  updateCheckoutSummary();
-  toggleCart();
-  showPage('checkout');
-}
-
-function updateCheckoutSummary() {
-  const items = Object.values(cart);
-  const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const fee = items.reduce((s, i) => Math.max(s, i.delivery_fee || 0), 0);
-  document.getElementById('summaryItems').innerHTML = items.map(i =>
-    `<tr><td>${i.name} × ${i.qty}</td><td>₹${(i.price * i.qty).toFixed(2)}</td></tr>`
-  ).join('');
-  document.getElementById('coSubtotal').textContent = `₹${sub.toFixed(2)}`;
-  document.getElementById('coDelivery').textContent = `₹${fee.toFixed(2)}`;
-  document.getElementById('coTotal').textContent = `₹${(sub + fee).toFixed(2)}`;
-}
-
-function showPincodeOk() {
-  const msg = document.getElementById('pincodeMsg');
-  msg.className = 'pincode-msg show pincode-ok';
-  msg.innerHTML = `<strong>✅ Delivery available for ${VALID_PINCODE}!</strong><p style="margin-top:.4rem">Serving apartments:</p><ul class="apts-list">${SERVED_APTS.map(a => `<li>${a}</li>`).join('')}</ul>`;
-  pincodeOk = true;
-}
-
-function checkPincode() {
-  const val = document.getElementById('pincode').value.trim();
-  const msg = document.getElementById('pincodeMsg');
-  if (!/^\d{6}$/.test(val)) { msg.className = 'pincode-msg show pincode-err'; msg.textContent = '❌ Please enter a valid 6-digit pincode.'; pincodeOk = false; return; }
-  if (val === VALID_PINCODE) showPincodeOk();
-  else { msg.className = 'pincode-msg show pincode-err'; msg.innerHTML = `<strong>❌ Sorry! We don't deliver to ${val} yet.</strong><p style="margin-top:.4rem">Serving only <strong>${VALID_PINCODE}</strong>:<br>${SERVED_APTS.join(', ')}</p>`; pincodeOk = false; }
-}
-
-async function proceedToPayment() {
-  if (!currentUser) { alert('Please login first'); showPage('login'); return; }
-  if (!pincodeOk) { alert('Please verify your delivery pincode first'); return; }
-  if (!document.getElementById('address').value.trim()) { alert('Please enter delivery address'); return; }
-  if (!document.getElementById('coName').value.trim()) { alert('Please enter your name'); return; }
-  const items = Object.values(cart);
-  if (!items.length) { alert('Your cart is empty'); return; }
-  const fee = items.reduce((s, i) => Math.max(s, i.delivery_fee || 0), 0);
-  const sub = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const total = (sub + fee).toFixed(2);
-  pendingOrder = {
-    delivery_fee: fee,
-    total_amount: total,
-    pincode: document.getElementById('pincode').value.trim(),
-    address: document.getElementById('address').value.trim(),
-    apartment: document.getElementById('apartment').value.trim()
-  };
-  showPaymentPage(total);
-}
-
-function showPaymentPage(amount) {
-  const amt = Number(amount).toFixed(2);
-  const upiUrl = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amt}&cu=INR&tn=${encodeURIComponent('ProShop Payment')}`;
-  document.getElementById('payAmount').textContent = amt;
-  document.querySelectorAll('.pay-amt-inline').forEach(el => el.textContent = amt);
-  document.getElementById('upiRefInput').value = '';
-  document.getElementById('upiRefInput').disabled = false;
-  hideErr('payError');
-  document.getElementById('qrcode').innerHTML = '';
-  new QRCode(document.getElementById('qrcode'), {
-    text: upiUrl, width: 200, height: 200,
-    colorDark: '#1a73e8', colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  showPage('payment');
-}
-
-// FIX: No strict validation - just require non-empty entry or allow blank
-async function confirmPayment() {
-  const upiRef = document.getElementById('upiRefInput').value.trim() || 'MANUAL_VERIFY_PENDING';
-  hideErr('payError');
-  if (!pendingOrder) { showErr('payError', 'No pending order. Please go back and retry.'); return; }
-  if (!currentUser) { showErr('payError', 'Session expired. Please login again.'); showPage('login'); return; }
-  
-  // Create a unique ID for the button to reliably find it
-  const btnId = 'confirmPayBtn';
-  const btn = document.getElementById(btnId) || document.querySelector('[onclick="confirmPayment()"]');
-  const originalText = '✅ I have paid – Confirm Order';
-  
-  if (btn) { btn.disabled = true; btn.textContent = 'Processing…'; }
-  
-  try {
-    // Save address
-    await api(`${API_BASE}/auth/save-address`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pincode: pendingOrder.pincode, address: pendingOrder.address, apartment: pendingOrder.apartment })
-    });
-    
-    // Create order with delivery details
-    const r1 = await api(`${API_BASE}/orders/create`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        delivery_fee: pendingOrder.delivery_fee,
-        payment_method: 'gpay',
-        address: pendingOrder.address,
-        pincode: pendingOrder.pincode,
-        apartment: pendingOrder.apartment,
-        items: Object.values(cart).map(i => ({ id: i.id, qty: i.qty }))
-      })
-    });
-    
-    const d1 = await r1.json();
-    if (!d1.success) {
-      showErr('payError', d1.error || 'Failed to create order. Please try again.');
-      if (btn) { btn.disabled = false; btn.textContent = originalText; }
-      return;
-    }
-    
-    // Confirm payment
-    const r2 = await api(`${API_BASE}/orders/confirm-payment`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order_id: d1.order_id, upi_ref: upiRef })
-    });
-    
-    const d2 = await r2.json();
-    if (d2.success) {
-      // Snapshot pendingOrder BEFORE clearing — fixes "Cannot read properties of null" crash
-      const confirmedOrder = {
-        total_amount: d1.total_amount,
-        apartment:    pendingOrder.apartment,
-        address:      pendingOrder.address,
-        pincode:      pendingOrder.pincode
-      };
-
-      // Clear state
-      cart = {};
-      pendingOrder = null;
-
-      // Re-enable button
-      if (btn) { btn.disabled = false; btn.textContent = originalText; }
-
-      // Update confirmation page using snapshot
-      document.getElementById('confirmOrderId').textContent = 'ORD-' + d1.order_id;
-      document.getElementById('confirmMsg').textContent = `₹${Number(confirmedOrder.total_amount).toFixed(2)} via GPay · Delivering to ${confirmedOrder.apartment || confirmedOrder.address}, ${confirmedOrder.pincode}`;
-      const refText = upiRef === 'MANUAL_VERIFY_PENDING' ? '📋 UPI Ref: Pending (admin will verify)' : '📋 UPI Ref: ' + upiRef;
-      document.getElementById('confirmRef').textContent = refText;
-
-      updateCartUI();
-      renderProducts(activeCat);
-      showPage('confirmation');
-    } else {
-      showErr('payError', d2.error || 'Payment confirmation failed.');
-      if (btn) { btn.disabled = false; btn.textContent = originalText; }
-    }
-  } catch (e) {
-    showErr('payError', 'Network error: ' + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = originalText; }
-  }
-}
-
-
-function cancelOrder() { pendingOrder = null; showPage('checkout'); }
-
-// ── MY ORDERS (customer tracking) ─────────────────────────────────────
-// 5-step tracker: pending_confirmation is step 0 (payment claimed, awaiting admin verify)
-const STATUS_STEPS = ['pending_confirmation', 'confirmed', 'preparing', 'on_the_way', 'delivered'];
-const STATUS_LABELS = {
-  pending_confirmation: { emoji: '🕐', label: 'Payment Pending' },
-  confirmed:            { emoji: '✅', label: 'Order Confirmed' },
-  preparing:            { emoji: '👨‍🍳', label: 'Preparing' },
-  on_the_way:           { emoji: '🛵', label: 'On the Way' },
-  delivered:            { emoji: '🎉', label: 'Delivered' },
-  awaiting_payment:     { emoji: '⏳', label: 'Awaiting Payment' },
-  cancelled:            { emoji: '❌', label: 'Cancelled' },
-};
-
-function showMyOrders() { showPage('myOrders'); }
-
-async function loadMyOrders() {
-  const div = document.getElementById('myOrdersList');
-  div.innerHTML = '<p style="text-align:center;color:#aaa;padding:3rem">Loading...</p>';
-  try {
-    const r = await api(`${API_BASE}/orders`, {  });
-    const orders = await r.json();
-    if (!orders.length) {
-      div.innerHTML = '<p style="text-align:center;color:#aaa;padding:3rem">No orders yet. Start shopping! 🛍️</p>';
-      return;
-    }
-    div.innerHTML = orders.map(o => renderOrderCard(o)).join('');
-  } catch (e) {
-    div.innerHTML = `<p style="text-align:center;color:var(--danger);padding:3rem">Error loading orders: ${e.message}</p>`;
-  }
-}
-
-function renderOrderCard(o) {
-  const st = o.status || 'confirmed';
-  const statusInfo = STATUS_LABELS[st] || { emoji: '📦', label: st };
-  const statusClass = `status-${st}`;
-  const itemsText = (o.items || []).map(i => `${i.name} × ${i.quantity || i.qty || 1}`).join(', ');
-  const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
-  const isCancelled = st === 'cancelled';
-  const isDelivered = st === 'delivered';
-
-  let trackHTML = '';
-  if (!isCancelled) {
-    const currentStep = STATUS_STEPS.indexOf(st);
-    trackHTML = `<div class="track-steps">
-      ${STATUS_STEPS.map((s, i) => {
-        const info = STATUS_LABELS[s];
-        const isDone = i < currentStep || isDelivered;
-        const isActive = i === currentStep && !isDelivered;
-        const cls = isDone ? 'done' : (isActive ? 'active' : '');
-        return `<div class="track-step">
-          <div class="track-dot ${cls}">${info.emoji}</div>
-          <div class="track-label ${cls}">${info.label}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }
-
-  return `<div class="order-card">
-    <div class="order-header">
-      <div>
-        <div class="order-id">Order #ORD-${o.id}</div>
-        <div class="order-date">${dateStr}</div>
-        <div class="order-items-list">${itemsText}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="order-amount">₹${Number(o.total_amount).toFixed(2)}</div>
-        <div class="order-status-badge ${statusClass}">${statusInfo.emoji} ${statusInfo.label}</div>
-        ${o.upi_ref && o.upi_ref !== 'MANUAL_VERIFY_PENDING' ? `<div style="font-size:.78rem;color:#aaa;margin-top:.3rem">UPI: ${o.upi_ref}</div>` : ''}
+      <div class="card-footer">
+        <div class="price">
+          <small>Per Person</small>
+          <strong>₹${Number(p.price).toLocaleString('en-IN')}</strong>
+        </div>
+        <button class="btn-book" onclick="event.stopPropagation(); openPackage(${p.id})">View Details</button>
       </div>
     </div>
-    ${trackHTML}
-    ${o.delivery_apartment ? `<div style="font-size:.82rem;color:#888;margin-top:.8rem">📍 ${o.delivery_apartment}, ${o.delivery_address}, ${o.delivery_pincode}</div>` : ''}
-  </div>`;
+  `;
 }
 
-// ── ADMIN ORDERS ───────────────────────────────────────────────────────
-async function loadAdminOrders() {
+async function openPackage(id) {
+  document.getElementById('package-detail-content').innerHTML = '<div class="loader"><div class="spinner"></div>Loading...</div>';
+  openModal('package');
   try {
-    const r = await api(`${API_BASE}/admin/orders`, { method: 'GET' });
-    allAdminOrders = await r.json();
-    renderAdminOrders();
-  } catch (e) {
-    document.getElementById('ordersAdminBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--danger);padding:2rem">Error: ${e.message}</td></tr>`;
-  }
-}
-
-function filterAdminOrders(filter) {
-  adminOrderFilter = filter;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('ofbtn-' + filter);
-  if (btn) btn.classList.add('active');
-  renderAdminOrders();
-}
-
-function renderAdminOrders() {
-  const list = adminOrderFilter === 'all' ? allAdminOrders : allAdminOrders.filter(o => o.status === adminOrderFilter);
-  if (!list.length) {
-    document.getElementById('ordersAdminBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#aaa;padding:2rem">No orders found</td></tr>`;
-    return;
-  }
-  document.getElementById('ordersAdminBody').innerHTML = list.map((o, i) => {
-    const st = o.status || 'confirmed';
-    const statusInfo = STATUS_LABELS[st] || { emoji: '📦', label: st };
-    const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
-    const itemsText = (o.items || []).map(x => `${x.name}×${x.quantity}`).join(', ');
-    const phone = o.user_phone || o.customer_phone || '—';
-    return `<tr>
-      <td>${i + 1}</td>
-      <td><strong>ORD-${o.id}</strong></td>
-      <td>📱 +91-${phone}</td>
-      <td class="order-items-mini">${itemsText}</td>
-      <td><strong style="color:var(--success)">₹${Number(o.total_amount).toFixed(2)}</strong></td>
-      <td style="font-family:monospace;font-size:.8rem">${o.upi_ref || '<span class="no-val">—</span>'}</td>
-      <td style="font-size:.8rem">${dateStr}</td>
-      <td><span class="order-status-badge status-${st}" style="font-size:.75rem">${statusInfo.emoji} ${statusInfo.label}</span></td>
-      <td>
-        <select class="status-select" id="sel-${o.id}">
-          <option value="confirmed" ${st==='confirmed'?'selected':''}>✅ Confirmed</option>
-          <option value="preparing" ${st==='preparing'?'selected':''}>👨‍🍳 Preparing</option>
-          <option value="on_the_way" ${st==='on_the_way'?'selected':''}>🛵 On the Way</option>
-          <option value="delivered" ${st==='delivered'?'selected':''}>🎉 Delivered</option>
-          <option value="cancelled" ${st==='cancelled'?'selected':''}>❌ Cancelled</option>
-        </select>
-        <button class="btn btn-primary btn-sm btn-update-status" onclick="updateOrderStatus(${o.id})">Update</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-async function updateOrderStatus(oid) {
-  const sel = document.getElementById('sel-' + oid);
-  if (!sel) return;
-  const status = sel.value;
-  try {
-    const r = await api(`${API_BASE}/admin/orders/${oid}/status`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast(`✅ Order #ORD-${oid} → ${STATUS_LABELS[status]?.label || status}`);
-      // Update local data
-      const idx = allAdminOrders.findIndex(o => o.id === oid);
-      if (idx !== -1) allAdminOrders[idx].status = status;
-      renderAdminOrders();
-    } else showToast('❌ ' + (d.error || 'Update failed'));
-  } catch (e) { showToast('❌ Network error: ' + e.message); }
-}
-
-// ── ADMIN PANEL ────────────────────────────────────────────────────────
-function switchAdmin(sec) {
-  document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('asec-' + sec).classList.add('active');
-  document.getElementById('anav-' + sec).classList.add('active');
-  if (sec === 'products') loadAdminProducts();
-  if (sec === 'users') loadAdminUsers();
-  if (sec === 'orders') loadAdminOrders();
-}
-
-async function loadAdminDashboard() {
-  try {
-    const [pR, uR, oR] = await Promise.all([
-      fetch(`${API_BASE}/products`),
-      api(`${API_BASE}/admin/users`, { method: 'GET' }),
-      api(`${API_BASE}/admin/orders`, { method: 'GET' })
-    ]);
-    const ps = await pR.json(), us = await uR.json(), os = await oR.json();
-    const pending = os.filter(o => o.status === 'confirmed').length;
-    const onWay = os.filter(o => o.status === 'on_the_way').length;
-    document.getElementById('statCards').innerHTML = `
-      <div class="stat-card"><div class="sv">${ps.length}</div><div class="sl">Products</div></div>
-      <div class="stat-card"><div class="sv">${us.length}</div><div class="sl">Customers</div></div>
-      <div class="stat-card"><div class="sv">${os.length}</div><div class="sl">Total Orders</div></div>
-      <div class="stat-card"><div class="sv" style="color:var(--warning)">${pending}</div><div class="sl">Need Action</div></div>
-      <div class="stat-card"><div class="sv" style="color:var(--gpay)">${onWay}</div><div class="sl">On the Way</div></div>
+    const res = await fetch(API + '/packages/' + id);
+    const p = await res.json();
+    const stars = '★'.repeat(Math.round(p.rating || 0)) + '☆'.repeat(5 - Math.round(p.rating || 0));
+    const itineraryLines = (p.itinerary || '').split('\n').filter(Boolean);
+    document.getElementById('package-detail-content').innerHTML = `
+      <img src="${p.image_url}" class="pkg-modal-img" alt="${p.title}"/>
+      <h2>${p.title}</h2>
+      <div class="pkg-tags">
+        <span class="pkg-tag">📍 ${p.destination_name}, ${p.country}</span>
+        <span class="pkg-tag">⏱ ${p.duration_days} Days</span>
+        <span class="pkg-tag">👥 Max ${p.max_persons} Persons</span>
+        <span class="pkg-tag">${stars} ${p.rating}</span>
+      </div>
+      <p style="color:var(--muted);font-size:15px;line-height:1.8">${p.description || ''}</p>
+      <div class="pkg-section">
+        <h4>✅ Includes</h4>
+        <p>${p.includes || 'N/A'}</p>
+      </div>
+      <div class="pkg-section">
+        <h4>❌ Excludes</h4>
+        <p>${p.excludes || 'N/A'}</p>
+      </div>
+      ${itineraryLines.length ? `
+      <div class="pkg-section">
+        <h4>🗺 Itinerary</h4>
+        <ul class="itinerary-days">${itineraryLines.map(l => `<li>${l}</li>`).join('')}</ul>
+      </div>` : ''}
+      <div class="booking-form" id="booking-section-${id}">
+        <h4>Book This Package</h4>
+        ${currentUser ? `
+        <div class="form-row">
+          <div class="form-group">
+            <label>Travel Date</label>
+            <input type="date" id="b-date-${id}" min="${new Date().toISOString().split('T')[0]}"/>
+          </div>
+          <div class="form-group">
+            <label>Number of Persons</label>
+            <input type="number" id="b-persons-${id}" min="1" max="${p.max_persons}" value="1"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Special Requests (optional)</label>
+          <textarea id="b-special-${id}" placeholder="Any dietary requirements, special arrangements..."></textarea>
+        </div>
+        <div style="text-align:center;margin:16px 0">
+          <div style="font-size:13px;color:var(--muted)">Price per person</div>
+          <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--teal)">₹${Number(p.price).toLocaleString('en-IN')}</div>
+        </div>
+        <button class="btn-primary" onclick="bookPackage(${id}, ${p.price})">Confirm Booking ✈</button>
+        ` : `
+        <p style="text-align:center;color:var(--muted);margin-bottom:16px">Please login to book this package.</p>
+        <button class="btn-primary" onclick="closeModal('package'); openModal('login')">Login to Book</button>
+        `}
+      </div>
     `;
-    // Recent orders needing action
-    const actionOrders = os.filter(o => o.status === 'confirmed').slice(0, 5);
-    const dashDiv = document.getElementById('dashRecentOrders');
-    if (!actionOrders.length) {
-      dashDiv.innerHTML = '<p style="color:#aaa;text-align:center;padding:1rem">✅ No pending orders!</p>';
-    } else {
-      dashDiv.innerHTML = `<table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>UPI Ref</th><th>Action</th></tr></thead><tbody>` +
-        actionOrders.map(o => `<tr>
-          <td><strong>ORD-${o.id}</strong><br><span style="font-size:.78rem;color:#aaa">${(o.items||[]).map(x=>x.name).join(', ')}</span></td>
-          <td>+91-${o.user_phone || o.customer_phone || '—'}</td>
-          <td><strong style="color:var(--success)">₹${Number(o.total_amount).toFixed(2)}</strong></td>
-          <td style="font-family:monospace;font-size:.8rem">${o.upi_ref || '—'}</td>
-          <td><button class="btn btn-primary btn-sm" onclick="switchAdmin('orders')">Manage →</button></td>
-        </tr>`).join('') + '</tbody></table>';
-    }
-  } catch (e) { console.error('Dashboard error:', e); }
+  } catch(e) { document.getElementById('package-detail-content').innerHTML = '<p>Error loading package.</p>'; }
 }
 
-async function loadAdminProducts() {
-  await loadProducts();
-  document.getElementById('productsAdminBody').innerHTML = allProducts.map((p, i) =>
-    `<tr><td>${i + 1}</td><td><strong>${p.name}</strong></td>
-    <td><span class="badge ${getCat(p) === 'AnyTime' ? 'badge-food' : 'badge-grocery'}">${getCat(p)}</span></td>
-    <td>₹${Number(p.price).toFixed(2)}</td><td>${p.stock}</td><td>${p.max_qty || 10}</td>
-    <td>${(!p.delivery_fee) ? '<span class="tag tag-free">Free</span>' : `₹${p.delivery_fee}`}</td>
-    <td>
-      <button class="btn btn-warning btn-sm" onclick="openEditProduct(${p.id})" style="margin-right:4px">✏️ Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑 Delete</button>
-    </td></tr>`
-  ).join('');
-}
-
-async function loadAdminUsers() {
+async function bookPackage(packageId, price) {
+  const date = document.getElementById('b-date-' + packageId)?.value;
+  const persons = document.getElementById('b-persons-' + packageId)?.value;
+  const special = document.getElementById('b-special-' + packageId)?.value;
+  if (!date) { showToast('Please select a travel date', 'error'); return; }
+  if (!persons || persons < 1) { showToast('Please enter number of persons', 'error'); return; }
   try {
-    const r = await api(`${API_BASE}/admin/users`, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-    if (!r.ok) { document.getElementById('usersAdminBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:2rem">Error: ${r.status}</td></tr>`; return; }
-    const us = await r.json();
-    if (!us || !us.length) { document.getElementById('usersAdminBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#aaa;padding:2rem">No customers yet</td></tr>`; return; }
-    document.getElementById('usersAdminBody').innerHTML = us.map((u, i) =>
-      `<tr><td>${i + 1}</td><td>📱 +91-${u.phone}</td>
-      <td style="font-size:.82rem;color:#888">${u.created_at ? (u.created_at.split('T')[0] || u.created_at.split(' ')[0]) : '-'}</td>
-      <td>${u.apartment || '<span class="no-val">—</span>'}</td>
-      <td>${u.address || '<span class="no-val">Not saved yet</span>'}</td>
-      <td>${u.pincode || '<span class="no-val">—</span>'}</td></tr>`
-    ).join('');
-  } catch (e) {
-    document.getElementById('usersAdminBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:2rem">Error: ${e.message}</td></tr>`;
-  }
-}
-
-// ── PRODUCT MODAL (FIX: proper save with credentials) ──────────────────
-function openAddProduct() {
-  document.getElementById('modalTitle').textContent = 'Add New Product';
-  document.getElementById('editProductId').value = '';
-  ['pName','pDesc','pImageUrl'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('pPrice').value = '';
-  document.getElementById('pStock').value = '50';
-  document.getElementById('pMaxQty').value = '10';
-  document.getElementById('pDeliveryFee').value = '40';
-  hideErr('modalError');
-  document.getElementById('productModal').classList.add('show');
-}
-
-function openEditProduct(pid) {
-  const p = allProducts.find(x => x.id === pid);
-  if (!p) return;
-  document.getElementById('modalTitle').textContent = 'Edit Product';
-  document.getElementById('editProductId').value = pid;
-  document.getElementById('pName').value = p.name || '';
-  document.getElementById('pDesc').value = p.description || '';
-  document.getElementById('pPrice').value = p.price || '';
-  document.getElementById('pStock').value = p.stock || 0;
-  document.getElementById('pMaxQty').value = p.max_qty || 10;
-  document.getElementById('pDeliveryFee').value = p.delivery_fee != null ? p.delivery_fee : 40;
-  document.getElementById('pImageUrl').value = p.image_url || '';
-  hideErr('modalError');
-  document.getElementById('productModal').classList.add('show');
-}
-
-function closeModal() { document.getElementById('productModal').classList.remove('show'); }
-
-async function saveProduct() {
-  const pid = document.getElementById('editProductId').value;
-  const name = document.getElementById('pName').value.trim();
-  const price = document.getElementById('pPrice').value;
-  hideErr('modalError');
-  if (!name || !price) { showErr('modalError', 'Name and price are required'); return; }
-  const payload = {
-    name,
-    price: parseFloat(price),
-    description: document.getElementById('pDesc').value.trim(),
-    image_url: document.getElementById('pImageUrl').value.trim(),
-    stock: parseInt(document.getElementById('pStock').value) || 0,
-    max_qty: parseInt(document.getElementById('pMaxQty').value) || 10,
-    delivery_fee: parseFloat(document.getElementById('pDeliveryFee').value) || 0
-  };
-  const saveBtn = document.querySelector('[onclick="saveProduct()"]');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
-  try {
-    const url = pid ? `${API_BASE}/products/${pid}` : `${API_BASE}/products`;
-    const method = pid ? 'PUT' : 'POST';
-    const r = await api(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const res = await fetch(API + '/bookings', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer ' + currentToken},
+      body: JSON.stringify({package_id: packageId, travel_date: date, num_persons: parseInt(persons), special_requests: special})
     });
-    const d = await r.json();
-    if (d.success || d.id) {
-      closeModal();
-      showToast(pid ? '✅ Product updated!' : '✅ Product added!');
-      await loadProducts();
-      await loadAdminProducts();
-    } else {
-      showErr('modalError', d.error || 'Save failed');
-    }
-  } catch (e) {
-    showErr('modalError', 'Error: ' + e.message);
-  } finally {
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Product'; }
-  }
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error, 'error'); return; }
+    closeModal('package');
+    showToast('Booking confirmed! Total: ₹' + Number(data.total_price).toLocaleString('en-IN'), 'success');
+    showPage('bookings');
+  } catch(e) { showToast('Booking failed. Please try again.', 'error'); }
 }
 
-async function deleteProduct(pid) {
-  const p = allProducts.find(x => x.id === pid);
-  if (!confirm(`Delete "${p ? p.name : 'this product'}"?`)) return;
+// ── DESTINATIONS ──
+async function loadDestinations() {
+  const url = `${API}/destinations?category=${destCategory}`;
+  document.getElementById('destinations-grid').innerHTML = '<div class="loader"><div class="spinner"></div>Loading...</div>';
   try {
-    const r = await api(`${API_BASE}/products/${pid}`, { method: 'DELETE' });
-    const d = await r.json();
-    if (d.success) {
-      showToast('🗑 Product deleted');
-      await loadProducts();
-      await loadAdminProducts();
-      renderProducts(activeCat);
-    } else alert(d.error || 'Delete failed');
-  } catch (e) { alert(e.message); }
+    const res = await fetch(url);
+    const data = await res.json();
+    const grid = document.getElementById('destinations-grid');
+    if (!data.length) { grid.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No destinations found.</p>'; return; }
+    grid.innerHTML = data.map(d => `
+      <div class="card" onclick="showPage('packages'); setPkgCategory('${d.category}', document.querySelector('#page-packages .tab-btn:nth-child(${d.category==='domestic'?2:3})'))">
+        <div class="card-img">
+          <img src="${d.image_url}" alt="${d.name}" loading="lazy"/>
+          <span class="card-badge ${d.category === 'international' ? 'intl' : ''}">${d.country}</span>
+        </div>
+        <div class="card-body">
+          <h3>${d.name}</h3>
+          <p style="color:var(--muted);font-size:14px;line-height:1.6">${d.description}</p>
+        </div>
+        <div class="card-footer">
+          <span style="font-size:13px;color:var(--muted)">${d.category === 'domestic' ? '🇮🇳 Domestic' : '🌍 International'}</span>
+          <button class="btn-book">Explore →</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { document.getElementById('destinations-grid').innerHTML = '<p style="text-align:center;color:var(--muted)">Error loading destinations.</p>'; }
 }
 
-// ── INIT ───────────────────────────────────────────────────────────────
-// Restore session from localStorage
-currentUser = loadCurrentUser();
-if (currentUser) {
-  updateUserUI();
-  loadProducts();
-  if (currentUser.role === 'admin') showPage('adminPanel');
-  else showPage('home');
-} else {
-  loadProducts();
+function setDestCategory(cat, btn) {
+  destCategory = cat;
+  document.querySelectorAll('#page-destinations .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadDestinations();
+}
+
+// ── MY BOOKINGS ──
+async function loadMyBookings() {
+  if (!currentUser) { showPage('home'); openModal('login'); return; }
+  document.getElementById('bookings-list').innerHTML = '<div class="loader"><div class="spinner"></div>Loading...</div>';
+  try {
+    const res = await fetch(API + '/bookings/my', { headers:{'Authorization':'Bearer ' + currentToken} });
+    const data = await res.json();
+    const list = document.getElementById('bookings-list');
+    if (!data.length) { list.innerHTML = '<p style="text-align:center;color:var(--muted);padding:60px">No bookings yet. <a href="#" onclick="showPage(\'packages\')" style="color:var(--teal)">Browse packages →</a></p>'; return; }
+    list.innerHTML = data.map(b => `
+      <div class="booking-card">
+        <img src="${b.image_url || 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=200'}" alt="${b.package_title}"/>
+        <div class="booking-info">
+          <h4>${b.package_title}</h4>
+          <p>Travel Date: <b>${new Date(b.travel_date).toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'})}</b></p>
+          <p>Persons: <b>${b.num_persons}</b> &nbsp;|&nbsp; Total: <b style="color:var(--teal)">₹${Number(b.total_price).toLocaleString('en-IN')}</b></p>
+          <p>Duration: <b>${b.duration_days} Days</b></p>
+          <span class="status-badge status-${b.status}">${b.status}</span>
+          <span class="status-badge" style="background:#f0f0f0;color:var(--muted);margin-left:8px">${b.payment_status}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) { document.getElementById('bookings-list').innerHTML = '<p style="text-align:center;color:var(--muted)">Error loading bookings.</p>'; }
+}
+
+// ── ENQUIRY ──
+async function submitEnquiry() {
+  const name = document.getElementById('enq-name').value;
+  const email = document.getElementById('enq-email').value;
+  const phone = document.getElementById('enq-phone').value;
+  const message = document.getElementById('enq-message').value;
+  if (!name || !email || !message) { showToast('Please fill required fields', 'error'); return; }
+  try {
+    const res = await fetch(API + '/enquiries', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, phone, message})
+    });
+    if (res.ok) {
+      document.getElementById('enq-name').value = '';
+      document.getElementById('enq-email').value = '';
+      document.getElementById('enq-phone').value = '';
+      document.getElementById('enq-message').value = '';
+      showToast('Enquiry sent! We will contact you soon.', 'success');
+    }
+  } catch(e) { showToast('Error sending enquiry. Please try again.', 'error'); }
+}
+
+// ── SEARCH ──
+function heroSearch(e) { if (e.key === 'Enter') doHeroSearch(); }
+function doHeroSearch() {
+  const q = document.getElementById('hero-search').value.trim();
+  showPage('packages');
+  document.getElementById('pkg-search').value = q;
+  loadPackages();
+}
+
+// ── MODAL ──
+function openModal(name) { document.getElementById('modal-' + name).classList.add('open'); }
+function closeModal(name) { document.getElementById('modal-' + name).classList.remove('open'); }
+function switchModal(from, to) { closeModal(from); openModal(to); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ── TOAST ──
+let toastTimeout;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 4000);
 }
 </script>
 </body>
