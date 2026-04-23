@@ -26,16 +26,32 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  /* ── THEME BAR ── */
+  .theme-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1100;
+    background: #2d5016; color: #fff;
+    padding: 6px 5%; display: flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.5px;
+  }
+  .theme-bar span { opacity: 0.8; margin-right: 4px; }
+  .theme-dot {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.5); transition: all 0.2s;
+    display: inline-block; flex-shrink: 0;
+  }
+  .theme-dot:hover { border-color: #fff; transform: scale(1.15); }
+  .theme-dot.active { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.8); }
+
   body {
     font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
+    background: #e8f5e0;
     color: var(--text);
     overflow-x: hidden;
   }
 
   /* ── NAVBAR ── */
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    position: fixed; top: 34px; left: 0; right: 0; z-index: 1000;
     background: rgba(10,22,40,0.95);
     backdrop-filter: blur(12px);
     padding: 0 5%;
@@ -89,7 +105,7 @@
     min-height: 100vh;
     background: linear-gradient(135deg, var(--deep) 0%, var(--deep2) 40%, #0d3d3d 100%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 100px 5% 60px;
+    text-align: center; padding: 140px 5% 60px;
     position: relative; overflow: hidden;
   }
 
@@ -436,7 +452,70 @@
   .toast.success { border-left: 4px solid var(--success); }
   .toast.error { border-left: 4px solid var(--danger); }
 
-  /* ── LOADING ── */
+  /* ── CARD ACTIONS (Like & Enquiry) ── */
+  .card-actions {
+    display: flex; gap: 8px; padding: 0 24px 16px; border-top: none;
+  }
+  .btn-like, .btn-enquire {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 12px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
+  }
+  .btn-like {
+    background: #fff0f0; color: #e74c3c; border-color: #ffd0d0;
+  }
+  .btn-like:hover, .btn-like.liked {
+    background: #e74c3c; color: #fff; border-color: #e74c3c;
+  }
+  .btn-enquire {
+    background: #f0faf5; color: #27ae60; border-color: #c3e6cb;
+  }
+  .btn-enquire:hover { background: #27ae60; color: #fff; border-color: #27ae60; }
+
+  /* ── ENQUIRY SUCCESS POPUP ── */
+  .enquiry-popup {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 3000; align-items: center; justify-content: center;
+  }
+  .enquiry-popup.open { display: flex; }
+  .enquiry-popup-box {
+    background: #fff; border-radius: 20px; padding: 48px 40px;
+    text-align: center; max-width: 380px; animation: scaleIn 0.25s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .enquiry-popup-box .pop-icon { font-size: 56px; margin-bottom: 16px; }
+  .enquiry-popup-box h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--deep); margin-bottom: 12px; }
+  .enquiry-popup-box p { color: var(--muted); line-height: 1.7; margin-bottom: 24px; }
+  .btn-pop-close {
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: #fff; border: none; padding: 12px 32px; border-radius: 10px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+
+  /* ── WHATSAPP FLOAT ── */
+  .whatsapp-float {
+    position: fixed; bottom: 28px; left: 28px; z-index: 9000;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #25D366; color: #fff; font-size: 28px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.5);
+    text-decoration: none; transition: all 0.2s;
+  }
+  .whatsapp-float:hover { transform: scale(1.1); background: #128C7E; box-shadow: 0 6px 28px rgba(37,211,102,0.6); }
+
+  /* ── SUBCATEGORY TABS ── */
+  .sub-tabs {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap;
+  }
+  .sub-tab-btn {
+    padding: 8px 20px; border-radius: 50px; border: 2px solid #e0e0e0;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    background: #fff; color: var(--muted);
+  }
+  .sub-tab-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .sub-tab-btn:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+
   .loader { text-align: center; padding: 60px; color: var(--muted); }
   .spinner {
     width: 40px; height: 40px; border: 3px solid #e8ecf0;
@@ -464,6 +543,16 @@
 </style>
 </head>
 <body>
+
+<!-- THEME BAR -->
+<div class="theme-bar">
+  <span>🎨 Theme:</span>
+  <div class="theme-dot active" style="background:#4a7c2f" title="Light Green" onclick="setTheme('lightgreen', this)"></div>
+  <div class="theme-dot" style="background:#6b7c3e" title="Olive Green" onclick="setTheme('olive', this)"></div>
+  <div class="theme-dot" style="background:#2563eb" title="Blue" onclick="setTheme('blue', this)"></div>
+  <div class="theme-dot" style="background:#db2777" title="Pink" onclick="setTheme('pink', this)"></div>
+  <span style="margin-left:6px;opacity:0.6">Select background theme</span>
+</div>
 
 <!-- NAVBAR -->
 <nav>
@@ -648,7 +737,7 @@
 </div>
 
 <!-- ══════════════════ PACKAGES PAGE ══════════════════ -->
-<div id="page-packages" class="page" style="padding-top:72px">
+<div id="page-packages" class="page" style="padding-top:106px">
   <section class="section">
     <div class="section-header">
       <span class="section-label">✦ Explore</span>
@@ -663,6 +752,13 @@
       <button class="tab-btn" onclick="setPkgCategory('domestic', this)">🇮🇳 Domestic</button>
       <button class="tab-btn" onclick="setPkgCategory('international', this)">🌍 International</button>
     </div>
+    <div class="sub-tabs" id="sub-tabs">
+      <button class="sub-tab-btn active" onclick="setPkgSubCategory('', this)">All Types</button>
+      <button class="sub-tab-btn" onclick="setPkgSubCategory('devotional', this)">🙏 Devotional</button>
+      <button class="sub-tab-btn" onclick="setPkgSubCategory('vacation', this)">🌴 Vacation</button>
+      <button class="sub-tab-btn" onclick="setPkgSubCategory('couple', this)">💑 Couple</button>
+      <button class="sub-tab-btn" onclick="setPkgSubCategory('holiday', this)">🎉 Holiday</button>
+    </div>
     <div class="cards-grid" id="packages-grid">
       <div class="loader"><div class="spinner"></div>Loading...</div>
     </div>
@@ -670,7 +766,7 @@
 </div>
 
 <!-- ══════════════════ DESTINATIONS PAGE ══════════════════ -->
-<div id="page-destinations" class="page" style="padding-top:72px">
+<div id="page-destinations" class="page" style="padding-top:106px">
   <section class="section">
     <div class="section-header">
       <span class="section-label">✦ Explore</span>
@@ -689,7 +785,7 @@
 </div>
 
 <!-- ══════════════════ MY BOOKINGS PAGE ══════════════════ -->
-<div id="page-bookings" class="page" style="padding-top:72px">
+<div id="page-bookings" class="page" style="padding-top:106px">
   <section class="section">
     <div class="section-header">
       <span class="section-label">✦ My Account</span>
@@ -755,6 +851,21 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- WhatsApp Float Button -->
+<a class="whatsapp-float" href="https://wa.me/917639873833" target="_blank" title="Chat on WhatsApp">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="30" height="30" fill="currentColor"><path d="M16 0C7.163 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.769L0 32l8.459-2.018A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333c-2.603 0-5.042-.694-7.154-1.905l-.511-.302-5.021 1.198 1.224-4.881-.33-.537A13.265 13.265 0 012.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.375-9.87c-.404-.202-2.39-1.18-2.76-1.314-.37-.135-.64-.202-.91.202-.27.404-1.045 1.314-1.281 1.584-.236.27-.472.303-.876.101-.404-.202-1.706-.629-3.25-2.007-1.201-1.072-2.012-2.396-2.248-2.8-.236-.404-.025-.622.177-.823.182-.181.404-.472.606-.708.202-.236.27-.404.404-.674.135-.27.067-.505-.034-.708-.101-.202-.91-2.193-1.247-3.003-.328-.788-.661-.682-.91-.694l-.775-.013c-.27 0-.708.101-1.079.505-.37.404-1.415 1.382-1.415 3.37s1.449 3.909 1.651 4.179c.202.27 2.852 4.356 6.912 6.107.967.417 1.72.666 2.308.852.97.309 1.854.265 2.552.161.778-.116 2.39-.977 2.727-1.921.336-.944.336-1.754.236-1.921-.101-.168-.37-.27-.775-.472z"/></svg>
+</a>
+
+<!-- Enquiry Popup -->
+<div class="enquiry-popup" id="enquiry-popup">
+  <div class="enquiry-popup-box">
+    <div class="pop-icon">📞</div>
+    <h3>Enquiry Received!</h3>
+    <p>Thank you for your interest!<br/><strong>Our representative will contact you</strong> shortly to help plan your dream trip.</p>
+    <button class="btn-pop-close" onclick="document.getElementById('enquiry-popup').classList.remove('open')">Got it! ✓</button>
+  </div>
+</div>
 
 <footer>
   <div class="footer-grid">
