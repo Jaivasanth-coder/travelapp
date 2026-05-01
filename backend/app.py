@@ -20,7 +20,7 @@ else:
 
 
 # Create Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend", static_url_path="")
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET","POST","PUT","DELETE","OPTIONS"], "allow_headers": ["Content-Type","Authorization"]}})
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "sai-anjenya-yatra-secret-key")
