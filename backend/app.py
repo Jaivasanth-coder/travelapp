@@ -17,11 +17,25 @@ if Path(".env").exists():
 else:
     load_dotenv("env.properties")
 
+
+
 # Create Flask app
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET","POST","PUT","DELETE","OPTIONS"], "allow_headers": ["Content-Type","Authorization"]}})
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "sai-anjenya-yatra-secret-key")
+
+import os
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+
+
+
+@app.route("/")
+def index():
+    # Serve the index.html file from your frontend folder
+    return send_from_directory(app.static_folder, "index.html")
+
 
 @app.after_request
 def add_cors_headers(response):
