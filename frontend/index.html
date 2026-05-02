@@ -558,6 +558,7 @@
       <div class="hero-stat"><strong>50+</strong><span>DESTINATIONS</span></div>
       <div class="hero-stat"><strong>10+</strong><span>YEARS EXPERIENCE</span></div>
       <div class="hero-stat"><strong>4.9★</strong><span>AVERAGE RATING</span></div>
+      <div class="hero-stat"><strong id="visitor-count">00000</strong><span>PAGE VISITS</span></div>
     </div>
   </section>
 
@@ -923,6 +924,7 @@ window.onload = () => {
   updateAuthUI();
   loadFeaturedPackages();
   applySavedTheme();
+  updateVisitorCounter();
 };
 
 // ── PAGE NAVIGATION ──
@@ -986,7 +988,7 @@ async function doLogin() {
     if (data.user.is_admin) {
       setTimeout(() => showPage('admin'), 400);
     }
-  } catch(e) { showToast('Server error. Is the backend running?', 'error'); }
+  } catch(e) { showToast('Login error: ' + (e.message || 'Server error'), 'error'); console.error('Login error:', e); }
 }
 
 async function doRegister() {
@@ -1008,7 +1010,7 @@ async function doRegister() {
     closeModal('register'); updateAuthUI();
     showToast('Welcome, ' + data.user.name + '! Account created successfully.', 'success');
   } catch(e) {
-    showToast('Cannot connect to server. Make sure backend (python app.py) is running on port 5000.', 'error');
+    showToast('Register error: ' + (e.message || 'Server error'), 'error'); console.error('Register error:', e);
   }
 }
 
@@ -1472,6 +1474,22 @@ function applySavedTheme() {
   const saved = localStorage.getItem('say_theme') || 'lightgreen';
   const dot = document.querySelector(`.theme-dot[onclick*="${saved}"]`);
   if (dot) setTheme(saved, dot);
+}
+
+// ── VISITOR COUNTER ──
+function updateVisitorCounter() {
+  try {
+    const KEY = 'say_visit_count';
+    let count = parseInt(localStorage.getItem(KEY) || '0', 10);
+    // Only count once per session
+    if (!sessionStorage.getItem('say_visited')) {
+      count += 1;
+      localStorage.setItem(KEY, count);
+      sessionStorage.setItem('say_visited', '1');
+    }
+    const el = document.getElementById('visitor-count');
+    if (el) el.textContent = String(count).padStart(5, '0');
+  } catch(e) {}
 }
 
 // ── MODAL ──
