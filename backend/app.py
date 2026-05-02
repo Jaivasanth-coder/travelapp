@@ -20,9 +20,17 @@ elif Path("env.properties").exists():
 # APP SETUP
 # ─────────────────────────────────────────
 
-# Resolve frontend folder relative to THIS file so it works on any machine/Render
-BASE_DIR   = Path(__file__).resolve().parent.parent   # project root
-FRONT_DIR  = BASE_DIR / "frontend"
+# Resolve frontend folder — works whether gunicorn runs from project root or backend/
+_this_dir = Path(__file__).resolve().parent          # backend/
+_candidates = [
+    _this_dir.parent / "frontend",                   # project/frontend  (most common)
+    _this_dir / "frontend",                          # backend/frontend
+    _this_dir.parent,                                # project root itself
+    Path("frontend").resolve(),                      # cwd/frontend
+    Path(".").resolve(),                             # cwd (last resort)
+]
+FRONT_DIR = next((p for p in _candidates if (p / "index.html").exists()), _candidates[0])
+print(f"Serving frontend from: {FRONT_DIR}")
 
 app = Flask(__name__, static_folder=str(FRONT_DIR), static_url_path="")
 
@@ -646,7 +654,16 @@ def get_stats():
 
 @app.route("/api/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok", "app": "Sai Anjenya Yatra Travel App"})
+    import os
+    front = app.static_folder
+    index_exists = Path(front, "index.html").exists() if front else False
+    return jsonify({
+        "status": "ok",
+        "app": "Sai Anjenya Yatra Travel App",
+        "static_folder": str(front),
+        "index_html_found": index_exists,
+        "cwd": os.getcwd(),
+    })
 
 
 # ─────────────────────────────────────────
