@@ -459,6 +459,24 @@
     color: #fff; border: none; padding: 12px 32px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
   }
 
+  .visitor-badge {
+    position: fixed; bottom: 28px; right: 28px; z-index: 8999;
+    background: rgba(10,22,40,0.92); color: #fff;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 12px; padding: 10px 16px;
+    display: flex; flex-direction: column; align-items: center;
+    backdrop-filter: blur(8px); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    min-width: 90px;
+  }
+  .visitor-badge .v-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: #c9a84c; letter-spacing: 3px; line-height: 1.2;
+  }
+  .visitor-badge .v-label {
+    font-size: 10px; color: rgba(255,255,255,0.6);
+    letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
+  }
+
   .whatsapp-float {
     position: fixed; bottom: 28px; left: 28px; z-index: 9000;
     width: 56px; height: 56px; border-radius: 50%;
@@ -558,7 +576,6 @@
       <div class="hero-stat"><strong>50+</strong><span>DESTINATIONS</span></div>
       <div class="hero-stat"><strong>10+</strong><span>YEARS EXPERIENCE</span></div>
       <div class="hero-stat"><strong>4.9★</strong><span>AVERAGE RATING</span></div>
-      <div class="hero-stat"><strong id="visitor-count">00000</strong><span>PAGE VISITS</span></div>
     </div>
   </section>
 
@@ -851,6 +868,11 @@
 <div class="toast" id="toast"></div>
 
 <!-- WhatsApp Float — updated number -->
+<div class="visitor-badge" title="Page visits on this device">
+  <span class="v-num" id="visitor-count">00000</span>
+  <span class="v-label">Page Visits</span>
+</div>
+
 <a class="whatsapp-float" href="https://wa.me/917639873833" target="_blank" title="Chat on WhatsApp">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="30" height="30" fill="currentColor">
     <path d="M16 0C7.163 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.769L0 32l8.459-2.018A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333c-2.603 0-5.042-.694-7.154-1.905l-.511-.302-5.021 1.198 1.224-4.881-.33-.537A13.265 13.265 0 012.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.375-9.87c-.404-.202-2.39-1.18-2.76-1.314-.37-.135-.64-.202-.91.202-.27.404-1.045 1.314-1.281 1.584-.236.27-.472.303-.876.101-.404-.202-1.706-.629-3.25-2.007-1.201-1.072-2.012-2.396-2.248-2.8-.236-.404-.025-.622.177-.823.182-.181.404-.472.606-.708.202-.236.27-.404.404-.674.135-.27.067-.505-.034-.708-.101-.202-.91-2.193-1.247-3.003-.328-.788-.661-.682-.91-.694l-.775-.013c-.27 0-.708.101-1.079.505-.37.404-1.415 1.382-1.415 3.37s1.449 3.909 1.651 4.179c.202.27 2.852 4.356 6.912 6.107.967.417 1.72.666 2.308.852.97.309 1.854.265 2.552.161.778-.116 2.39-.977 2.727-1.921.336-.944.336-1.754.236-1.921-.101-.168-.37-.27-.775-.472z"/>
