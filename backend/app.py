@@ -598,6 +598,24 @@ def update_enquiry_status(enq_id):
 # ADMIN STATS
 # ─────────────────────────────────────────
 
+@app.route("/api/admin/users", methods=["GET"])
+@admin_required
+def get_admin_users():
+    conn = get_db()
+    cur  = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("""
+        SELECT u.id, u.name, u.email, u.is_admin, u.created_at,
+               COUNT(b.id) as booking_count
+        FROM users u
+        LEFT JOIN bookings b ON b.user_id = u.id
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+    """)
+    result = cur.fetchall()
+    cur.close(); conn.close()
+    return jsonify([dict(u) for u in result])
+
+
 @app.route("/api/admin/stats", methods=["GET"])
 @admin_required
 def get_stats():
@@ -613,6 +631,8 @@ def get_stats():
     packages = cur.fetchone()["total"]
     cur.execute("SELECT COUNT(*) as total FROM enquiries WHERE status='new'")
     new_enquiries = cur.fetchone()["total"]
+    cur.execute("SELECT COUNT(*) as total FROM bookings WHERE status='pending'")
+    pending_bookings = cur.fetchone()["total"]
     cur.close(); conn.close()
     return jsonify({
         "total_users": users,
@@ -620,6 +640,7 @@ def get_stats():
         "total_revenue": float(revenue),
         "total_packages": packages,
         "new_enquiries": new_enquiries,
+        "pending_bookings": pending_bookings,
     })
 
 
