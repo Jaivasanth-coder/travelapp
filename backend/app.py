@@ -311,14 +311,29 @@ def register():
 @app.route("/api/auth/login", methods=["POST"])
 def login():
     data  = request.json
+    if not data:
+        return jsonify({"error": "Invalid request body"}), 400
     email = data.get("email", "").strip().lower()
     password = data.get("password", "")
-    conn = get_db()
-    cur  = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-    user = cur.fetchone()
-    cur.close(); conn.close()
-    if not user or not bcrypt.checkpw(password.encode(), user["password"].encode()):
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+    try:
+        conn = get_db()
+        cur  = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        cur.close(); conn.close()
+    except Exception as e:
+        print(f"DB error during login: {e}")
+        return jsonify({"error": "Database error. Please try again."}), 500
+    if not user:
+        return jsonify({"error": "Invalid email or password"}), 401
+    try:
+        password_matches = bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8"))
+    except Exception as e:
+        print(f"bcrypt error during login: {e}")
+        return jsonify({"error": "Authentication error. Please try again."}), 500
+    if not password_matches:
         return jsonify({"error": "Invalid email or password"}), 401
     token = generate_token(user["id"], user["is_admin"])
     return jsonify({
