@@ -432,13 +432,13 @@
   .footer-bottom span { color: var(--gold); }
 
   .toast {
-    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    position: fixed; bottom: 32px; left: 50%; z-index: 9999;
     background: var(--deep); color: var(--white);
     padding: 16px 24px; border-radius: 12px; box-shadow: var(--shadow-lg);
     font-size: 14px; display: flex; align-items: center; gap: 12px;
-    transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 360px;
+    transform: translateX(-50%) translateY(100px); opacity: 0; transition: all 0.3s; max-width: 360px;
   }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   .toast.success { border-left: 4px solid var(--success); }
   .toast.error { border-left: 4px solid var(--danger); }
 
@@ -909,7 +909,7 @@
 </footer>
 
 <script>
-const API = 'http://localhost:5000/api';
+const API = '/api';
 let currentUser = JSON.parse(localStorage.getItem('say_user') || 'null');
 let currentToken = localStorage.getItem('say_token') || '';
 let allPackages = [];
