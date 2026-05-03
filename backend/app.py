@@ -3,8 +3,6 @@ import jwt
 import bcrypt
 import psycopg2
 import psycopg2.extras
-import threading
-import urllib.request
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -81,9 +79,6 @@ limiter = Limiter(
     storage_uri="memory://",   # use Redis URI in production for multi-worker support
 )
 
-# Module-level hook so gunicorn (which never hits __main__) also starts keep-alive.
-# Uses a flag so it only fires once even if the module is imported multiple times.
-_keep_alive_started = False
 
 
 # ─────────────────────────────────────────
@@ -694,9 +689,17 @@ def rate_limit_exceeded(e):
     }), 429
 
 
+@app.route("/ping", methods=["GET"])
+def ping():
+    """
+    Lightweight public endpoint for external uptime monitors (UptimeRobot etc.)
+    No DB call — just confirms the process is alive.
+    """
+    return "pong", 200
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
-    import os
     front = app.static_folder
     index_exists = Path(front, "index.html").exists() if front else False
     return jsonify({
@@ -708,46 +711,6 @@ def health():
     })
 
 
-# ─────────────────────────────────────────
-# KEEP-ALIVE (prevents Render free tier spin-down)
-# Pings /api/health every 14 minutes in production only.
-# On free tier Render shuts down after 15 min inactivity —
-# this keeps the service warm so users never see the loading screen.
-# ─────────────────────────────────────────
-
-def _keep_alive():
-    """Background thread: ping own health endpoint every 14 minutes."""
-    import time
-    INTERVAL = 14 * 60  # 14 minutes in seconds
-    # Wait 60s after startup before first ping so the server is fully ready
-    time.sleep(60)
-    while True:
-        try:
-            port = os.environ.get("PORT", "5000")
-            url  = f"http://localhost:{port}/api/health"
-            req  = urllib.request.urlopen(url, timeout=10)
-            print(f"[keep-alive] ✅ Pinged {url} → {req.status}")
-        except Exception as e:
-            print(f"[keep-alive] ⚠️  Ping failed: {e}")
-        time.sleep(INTERVAL)
-
-
-def start_keep_alive():
-    """Start keep-alive only on Render (production). Skip in local dev."""
-    global _keep_alive_started
-    if _keep_alive_started:
-        return
-    _keep_alive_started = True
-    if APP_ENV != "development":
-        t = threading.Thread(target=_keep_alive, daemon=True, name="keep-alive")
-        t.start()
-        print("[keep-alive] 🟢 Started — pinging every 14 min to prevent spin-down")
-    else:
-        print("[keep-alive] ⏭️  Skipped (development mode)")
-
-
-# Auto-start when imported by gunicorn
-start_keep_alive()
 
 
 # ─────────────────────────────────────────
@@ -756,7 +719,6 @@ start_keep_alive()
 
 if __name__ == "__main__":
     init_db()
-    start_keep_alive()
     is_dev = APP_ENV == "development"
     app.run(
         debug=is_dev,
