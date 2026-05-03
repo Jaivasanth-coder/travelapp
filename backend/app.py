@@ -7,6 +7,8 @@ import threading
 import urllib.request
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from functools import wraps
@@ -68,6 +70,16 @@ CORS(app, resources={
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 if not app.config["SECRET_KEY"]:
     raise RuntimeError("SECRET_KEY environment variable is not set!")
+
+# ─────────────────────────────────────────
+# RATE LIMITING
+# ─────────────────────────────────────────
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["500 per day", "100 per hour"],
+    storage_uri="memory://",   # use Redis URI in production for multi-worker support
+)
 
 # Module-level hook so gunicorn (which never hits __main__) also starts keep-alive.
 # Uses a flag so it only fires once even if the module is imported multiple times.
@@ -207,21 +219,14 @@ def init_db():
     """)
 
     conn.commit()
-    seed_data(cur, conn)
+    seed_destinations(cur, conn)
     cur.close()
     conn.close()
     print("✅ Database initialised successfully.")
 
 
-def seed_data(cur, conn):
-    cur.execute("SELECT id FROM users WHERE email = 'admin@saianjenya.com'")
-    if not cur.fetchone():
-        hashed = bcrypt.hashpw("Admin@123".encode(), bcrypt.gensalt()).decode()
-        cur.execute(
-            "INSERT INTO users (name, email, password, is_admin) VALUES (%s,%s,%s,%s)",
-            ("Admin", "admin@saianjenya.com", hashed, True)
-        )
-
+def seed_destinations(cur, conn):
+    """Seeds destinations and packages only. Admin users are managed via DB directly."""
     cur.execute("SELECT COUNT(*) FROM destinations")
     if cur.fetchone()[0] == 0:
         destinations = [
@@ -317,6 +322,7 @@ def admin_required(f):
 # ─────────────────────────────────────────
 
 @app.route("/api/auth/register", methods=["POST"])
+@limiter.limit("5 per minute; 20 per hour")
 def register():
     data  = request.json
     name  = data.get("name", "").strip()
@@ -344,6 +350,7 @@ def register():
 
 
 @app.route("/api/auth/login", methods=["POST"])
+@limiter.limit("10 per minute; 50 per hour")
 def login():
     data  = request.json
     if not data:
@@ -677,6 +684,14 @@ def get_stats():
         "new_enquiries": new_enquiries,
         "pending_bookings": pending_bookings,
     })
+
+
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({
+        "error": "Too many requests. Please slow down and try again shortly.",
+        "retry_after": str(e.description)
+    }), 429
 
 
 @app.route("/api/health", methods=["GET"])
